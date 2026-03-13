@@ -9,7 +9,7 @@ import { PriorityBadge } from '../../components/ui/PriorityBadge';
 import { TicketStatus } from '../../types';
 import {
   Search, ChevronDown, UserCheck, Users,
-  Clock, CheckCircle2, AlertCircle, Ticket as TicketIcon, RotateCcw, X
+  Clock, CheckCircle2, AlertCircle, Ticket as TicketIcon, RotateCcw
 } from 'lucide-react';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
@@ -42,10 +42,7 @@ export const AdminTickets: React.FC = () => {
 
   const dept = departments.find(d => d.id === user.departmentId);
 
-  // All employees in this department (possible resolvers)
-  const resolvers = users.filter(u =>
-    u.departmentId === user.departmentId && (u.role === 'EMPLOYEE' || u.role === 'ADMIN')
-  );
+
 
   // Filter tickets for this department
   const deptTickets = tickets
@@ -387,52 +384,6 @@ export const AdminTickets: React.FC = () => {
         </div>
       )}
 
-      {/* Select Assignee Modal */}
-      {assigningTicketId && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
-          <div className="glass-card w-full max-w-md overflow-hidden animate-slide-up">
-            <div className="p-4 border-b border-white/5 flex items-center justify-between bg-white/[0.02]">
-              <h3 className="font-bold text-white flex items-center gap-2">
-                <UserCheck size={18} className="text-violet-400" />
-                Select Assignee
-              </h3>
-              <button onClick={() => setAssigningTicketId(null)} className="p-1 text-slate-500 hover:text-white transition-colors">
-                <X size={20} />
-              </button>
-            </div>
-            <div className="p-2 max-h-[60vh] overflow-y-auto custom-scrollbar">
-              <div className="grid gap-1">
-                {resolvers.length === 0 ? (
-                  <div className="p-8 text-center text-slate-500 text-sm">No staff members found in your department.</div>
-                ) : (
-                  resolvers.map(resUser => (
-                    <button
-                      key={resUser.id}
-                      onClick={() => setConfirmAssignData({ 
-                        ticketId: assigningTicketId, 
-                        userId: resUser.id, 
-                        userName: resUser.name 
-                      })}
-                      className="flex items-center gap-3 p-3 rounded-xl hover:bg-white/5 transition-all group text-left"
-                    >
-                      <img 
-                        src={resUser.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(resUser.name)}&background=8b5cf6&color=fff`} 
-                        className="w-10 h-10 rounded-full border border-white/10 group-hover:border-violet-500/50 transition-colors" 
-                        alt="" 
-                      />
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-semibold text-slate-200 group-hover:text-white truncate">{resUser.name}</p>
-                        <p className="text-xs text-slate-500 truncate capitalize">{resUser.role.toLowerCase()}</p>
-                      </div>
-                      <ChevronDown size={14} className="text-slate-600 -rotate-90" />
-                    </button>
-                  ))
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };
