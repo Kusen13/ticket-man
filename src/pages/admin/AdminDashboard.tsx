@@ -130,38 +130,40 @@ export const AdminDashboard: React.FC = () => {
       </div>
 
       {/* Filter Bar */}
-      <div className="glass-card p-4 no-print border-violet-500/10">
-        <div className="flex flex-col md:flex-row md:items-center gap-6">
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-violet-500/10 flex items-center justify-center text-violet-400">
+      <div className="glass-card p-4 md:p-5 no-print border-violet-500/10">
+        <div className="flex flex-col lg:flex-row lg:items-center gap-6">
+          <div className="flex items-center gap-3 shrink-0">
+            <div className="w-9 h-9 rounded-xl bg-violet-500/10 flex items-center justify-center text-violet-400">
               <Filter size={18} />
             </div>
             <h3 className="font-semibold text-white text-sm">Report Period</h3>
           </div>
           
-          <div className="flex flex-1 flex-wrap items-center gap-4">
-            <div className="relative group">
-              <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 w-4 h-4 group-focus-within:text-violet-400 transition-colors" />
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 w-full flex-1">
+            <div className="relative w-full sm:w-auto flex-1">
+              <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 w-4 h-4" />
               <input 
                 type="date" 
                 value={startDate}
                 onChange={(e) => setStartDate(e.target.value)}
-                className="bg-slate-900/50 border border-white/10 rounded-lg py-2 pl-9 pr-4 text-sm text-white focus:outline-none focus:border-violet-500/50 w-full md:w-auto"
+                className="bg-slate-900/50 border border-white/10 rounded-lg py-2 pl-9 pr-4 text-sm text-white focus:outline-none focus:border-violet-500/50 w-full transition-colors"
+                title="Start Period"
               />
             </div>
-            <span className="text-slate-600 hidden md:block">to</span>
-            <div className="relative group">
-              <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 w-4 h-4 group-focus-within:text-violet-400 transition-colors" />
+            <span className="text-slate-600 hidden sm:block">to</span>
+            <div className="relative w-full sm:w-auto flex-1">
+              <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 w-4 h-4" />
               <input 
                 type="date" 
                 value={endDate}
                 onChange={(e) => setEndDate(e.target.value)}
-                className="bg-slate-900/50 border border-white/10 rounded-lg py-2 pl-9 pr-4 text-sm text-white focus:outline-none focus:border-violet-500/50 w-full md:w-auto"
+                className="bg-slate-900/50 border border-white/10 rounded-lg py-2 pl-9 pr-4 text-sm text-white focus:outline-none focus:border-violet-500/50 w-full transition-colors"
+                title="End Period"
               />
             </div>
           </div>
           
-          <div className="text-xs text-slate-500 italic block md:inline">
+          <div className="text-xs text-slate-500 italic shrink-0 w-full lg:w-auto text-left lg:text-right">
             Showing {deptTickets.length} records in this period
           </div>
         </div>

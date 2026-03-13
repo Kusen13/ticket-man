@@ -140,7 +140,7 @@ export const SuperAdminDashboard: React.FC = () => {
             </div>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 flex-1">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 flex-1 w-full min-w-0">
             {/* Dept Filter */}
             <div className="space-y-1.5">
               <label className="text-[10px] font-bold text-slate-500 uppercase flex items-center gap-1.5">
