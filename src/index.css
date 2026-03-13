@@ -1,3 +1,4 @@
+/* stylelint-disable at-rule-no-unknown */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -78,8 +79,6 @@ body {
   background-color: var(--bg-base) !important;
 }
 
-.light,
-.light .text-white,
 .light .text-slate-50,
 .light .text-slate-100,
 .light .text-slate-200,
@@ -108,12 +107,29 @@ body {
 
 .light .bg-slate-800\/50,
 .light .bg-slate-900\/50 {
-  background-color: #1a1a1c !important; /* Dark contrast components */
+  background-color: #1a1a1c !important; /* Restore dark contrast components per request */
   color: #ffffff !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
 }
 
 .light .bg-slate-800\/50 *,
 .light .bg-slate-900\/50 * {
+  color: #ffffff !important; /* Ensure all text inside stays white */
+}
+
+.light .light-tab {
+  color: rgba(255, 255, 255, 0.6) !important;
+}
+
+.light .light-tab:hover {
+  color: #ffffff !important;
+}
+
+.light .active-light-tab {
+  color: #ffffff !important;
+}
+
+.light .text-white {
   color: #ffffff !important;
 }
 
@@ -199,8 +215,14 @@ body {
 }
 
 /* Explicitly target color-coded text that gets too light */
-.light .text-violet-400, .light .text-cyan-400, .light .text-emerald-400, .light .text-rose-400, .light .text-orange-400 {
+.light .text-violet-400, .light .text-cyan-400, .light .text-emerald-400, 
+.light .text-rose-400, .light .text-orange-400 {
   color: #000000 !important;
+  font-weight: 800 !important;
+}
+
+.light .text-amber-400, .light .text-amber-500, .light .text-amber-600 {
+  color: #b45309 !important; /* Dark Amber for better contrast on light backgrounds */
   font-weight: 800 !important;
 }
 

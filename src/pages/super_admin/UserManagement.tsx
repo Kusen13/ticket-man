@@ -138,20 +138,20 @@ export const UserManagement: React.FC = () => {
           <div className="flex bg-slate-900/50 p-1 rounded-xl border border-white/5 self-start overflow-x-auto max-w-full">
             <button
               onClick={() => setActiveTab('approved')}
-              className={`px-4 py-2 text-sm font-medium rounded-lg transition-all ${
+              className={`px-4 py-2 text-sm font-bold rounded-lg transition-all ${
                 activeTab === 'approved' 
-                ? 'bg-violet-600 text-white shadow-lg shadow-violet-600/20' 
-                : 'text-slate-400 hover:text-slate-200'
+                ? 'bg-violet-600 text-white shadow-lg shadow-violet-600/20 active-light-tab' 
+                : 'text-slate-400 hover:text-slate-300 light-tab'
               }`}
             >
-              Approved Users
+              Approved Accounts
             </button>
             <button
               onClick={() => setActiveTab('requests')}
-              className={`px-4 py-2 text-sm font-medium rounded-lg transition-all flex items-center gap-2 ${
+              className={`px-4 py-2 text-sm font-bold rounded-lg transition-all flex items-center gap-2 ${
                 activeTab === 'requests' 
-                ? 'bg-amber-600 text-white shadow-lg shadow-amber-600/20' 
-                : 'text-slate-400 hover:text-slate-200'
+                ? 'bg-amber-600 text-white shadow-lg shadow-amber-600/20 active-light-tab' 
+                : 'text-slate-400 hover:text-slate-300 light-tab'
               }`}
             >
               Access Requests
@@ -171,10 +171,10 @@ export const UserManagement: React.FC = () => {
       {/* Stats Row */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {[
-          { label: 'Total Users', value: users.length, color: 'text-white' },
-          { label: 'Super Admins', value: users.filter(u => u.role === 'SUPER_ADMIN').length, color: 'text-rose-400' },
-          { label: 'Dept Admins', value: users.filter(u => u.role === 'ADMIN').length, color: 'text-violet-400' },
-          { label: 'Employees', value: users.filter(u => u.role === 'EMPLOYEE').length, color: 'text-cyan-400' },
+          { label: 'Total Users', value: users.length, color: 'text-[var(--text-primary)]' },
+          { label: 'Super Admins', value: users.filter(u => u.role === 'SUPER_ADMIN').length, color: 'text-rose-500' },
+          { label: 'Dept Admins', value: users.filter(u => u.role === 'ADMIN').length, color: 'text-violet-500' },
+          { label: 'Employees', value: users.filter(u => u.role === 'EMPLOYEE').length, color: 'text-cyan-500' },
         ].map(stat => (
           <div key={stat.label} className="glass-card p-4">
             <div className="text-xs text-slate-500 mb-1">{stat.label}</div>

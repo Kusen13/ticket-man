@@ -295,7 +295,10 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const { data, error: _msgError } = await supabase.from('messages').insert([{ conversation_id: conversationId, sender_id: senderId, receiver_id: receiverId, content, attachments: uploadedAttachments, is_read: false }]).select().single();
       if (data) {
         setMessages(prev => [...prev, { id: data.id, conversationId: data.conversation_id, senderId: data.sender_id, receiverId: data.receiver_id, content: data.content, attachments: data.attachments || [], isRead: data.is_read, createdAt: data.created_at }]);
-        addNotification(receiverId, 'New Message', `You received a new message from ${getUserById(senderId)?.name || 'Someone'}`, 'MENTION', `/${getUserById(receiverId)?.role.toLowerCase()}/messages`);
+        const receiver = getUserById(receiverId);
+        const sender = getUserById(senderId);
+        addNotification(receiverId, 'New Message', `You received a new message from ${sender?.name || 'Someone'}`, 'MENTION', `/${receiver?.role?.toLowerCase() || 'employee'}/messages`);
+
       }
     } catch (error) { console.error('Error sending message:', error); }
   }, [addNotification, getUserById]);
@@ -356,7 +359,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const newUser: User = { id: request.id, name: request.name, email: request.email, role: request.role, approvalStatus: 'APPROVED' };
         setUsers(prev => [...prev, newUser]);
         setAccessRequests(prev => prev.filter(r => r.id !== id));
-        addNotification(request.id, 'Account Approved', 'Your account has been approved by an administrator.', 'OTHER', `/${request.role.toLowerCase()}`);
+        addNotification(request.id, 'Account Approved', 'Your account has been approved by an administrator.', 'OTHER', `/${request.role?.toLowerCase() || 'employee'}`);
       }
     } catch (err) { console.error(err); }
   }, [accessRequests, addNotification]);
@@ -413,13 +416,38 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const addCategory = useCallback(async (cat: Omit<Category, 'id'>) => {
     try {
-      const { data: newDbCat } = await supabase.from('categories').insert({ name: cat.name, description: cat.description || null, default_priority: cat.defaultPriority, department_id: cat.departmentId || null }).select().single();
+      const { data: newDbCat, error } = await supabase
+        .from('categories')
+        .insert({ 
+          name: cat.name, 
+          description: cat.description || null, 
+          default_priority: cat.defaultPriority, 
+          department_id: cat.departmentId || null 
+        })
+        .select()
+        .single();
+        
+      if (error) {
+        console.error('Error adding category:', error);
+        alert(`Failed to add category: ${error.message}`);
+        return;
+      }
+
       if (newDbCat) {
-        const mapped: Category = { id: newDbCat.id, name: newDbCat.name, description: newDbCat.description || '', defaultPriority: newDbCat.default_priority as any, departmentId: newDbCat.department_id };
+        const mapped: Category = { 
+          id: newDbCat.id, 
+          name: newDbCat.name, 
+          description: newDbCat.description || '', 
+          defaultPriority: newDbCat.default_priority as any, 
+          departmentId: newDbCat.department_id 
+        };
         setCategories(prev => [...prev.filter(c => c.id !== mapped.id), mapped]);
         return mapped;
       }
-    } catch (err) { console.error(err); }
+    } catch (err: any) { 
+      console.error(err);
+      alert(`An unexpected error occurred: ${err.message || 'Unknown error'}`);
+    }
   }, []);
 
   const updateCategory = useCallback(async (id: string, updates: Partial<Category>) => {
@@ -429,16 +457,34 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (updates.description !== undefined) dbUpdates.description = updates.description;
       if (updates.defaultPriority !== undefined) dbUpdates.default_priority = updates.defaultPriority;
       if (updates.departmentId !== undefined) dbUpdates.department_id = updates.departmentId;
-      await supabase.from('categories').update(dbUpdates).eq('id', id);
+      
+      const { error } = await supabase.from('categories').update(dbUpdates).eq('id', id);
+      if (error) {
+        console.error('Error updating category:', error);
+        alert(`Failed to update category: ${error.message}`);
+        return;
+      }
+      
       setCategories(prev => prev.map(c => c.id === id ? { ...c, ...updates } : c));
-    } catch (err) { console.error(err); }
+    } catch (err: any) { 
+      console.error(err);
+      alert(`An unexpected error occurred: ${err.message || 'Unknown error'}`);
+    }
   }, []);
 
   const deleteCategory = useCallback(async (id: string) => {
     try {
-      await supabase.from('categories').delete().eq('id', id);
+      const { error } = await supabase.from('categories').delete().eq('id', id);
+      if (error) {
+        console.error('Error deleting category:', error);
+        alert(`Failed to delete category: ${error.message}`);
+        return;
+      }
       setCategories(prev => prev.filter(c => c.id !== id));
-    } catch (err) { console.error(err); }
+    } catch (err: any) { 
+      console.error(err);
+      alert(`An unexpected error occurred: ${err.message || 'Unknown error'}`);
+    }
   }, []);
 
   const updateConfig = useCallback(async (updates: Partial<SystemConfig>) => {
@@ -455,9 +501,19 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (updates.urgentKeywords) dbUpdates.urgent_keywords = updates.urgentKeywords;
       if (updates.highKeywords) dbUpdates.high_keywords = updates.highKeywords;
       if (updates.mediumKeywords) dbUpdates.medium_keywords = updates.mediumKeywords;
-      await supabase.from('system_config').update(dbUpdates).match({ id: (await supabase.from('system_config').select('id').single()).data?.id });
+      
+      const { error } = await supabase.from('system_config').update(dbUpdates).eq('id', 1);
+      if (error) {
+        console.error('Error updating config:', error);
+        alert(`Failed to save settings: ${error.message}`);
+        return;
+      }
+      
       setConfig(prev => ({ ...prev, ...updates }));
-    } catch (err) { console.error(err); }
+    } catch (err: any) { 
+      console.error(err);
+      alert(`An unexpected error occurred: ${err.message || 'Unknown error'}`);
+    }
   }, []);
 
   const addArticle = useCallback(async (article: Omit<KBArticle, 'id' | 'createdAt' | 'updatedAt'>) => {

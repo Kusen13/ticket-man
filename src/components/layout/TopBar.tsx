@@ -48,7 +48,7 @@ export const TopBar: React.FC<TopBarProps> = ({ isCollapsed, onOpenMobileMenu })
   const { tickets } = useTickets();
 
   useEffect(() => {
-    if (!searchQuery.trim()) {
+    if (!searchQuery.trim() || !user) {
       setSearchResults([]);
       return;
     }
@@ -67,7 +67,7 @@ export const TopBar: React.FC<TopBarProps> = ({ isCollapsed, onOpenMobileMenu })
         id: t.id,
         title: t.title,
         type: 'ticket' as const,
-        path: `/${user?.role.toLowerCase()}/tickets/${t.id}`,
+        path: `/${user.role.toLowerCase()}/tickets/${t.id}`,
         ticketNumber: t.ticketNumber ? `TKT-${String(t.ticketNumber).padStart(5, '0')}` : undefined
       }));
 
