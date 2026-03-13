@@ -2,11 +2,13 @@ import React, { useState } from 'react';
 import { Navigate, useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { supabase } from '../supabaseClient';
-import { Ticket, Mail, Lock, ArrowRight, Loader2, User as UserIcon } from 'lucide-react';
+import { Ticket, Mail, Lock, ArrowRight, Loader2, User as UserIcon, Sun, Moon } from 'lucide-react';
+import { useTheme } from '../context/ThemeContext';
 
 export const LoginPage: React.FC = () => {
   const { user, isLoading } = useAuth();
   const navigate = useNavigate();
+  const { theme, toggleTheme } = useTheme();
   
   const [isSignup, setIsSignup] = useState(false);
   const [name, setName] = useState('');
@@ -19,7 +21,7 @@ export const LoginPage: React.FC = () => {
 
   // Wait for session to load (handles OAuth token resolution)
   if (isLoading) return (
-    <div className="min-h-screen bg-[#06060b] flex items-center justify-center">
+    <div className="min-h-screen bg-[var(--bg-base)] flex items-center justify-center">
       <div className="w-10 h-10 rounded-full border-2 border-violet-500 border-t-transparent animate-spin" />
     </div>
   );
@@ -107,7 +109,17 @@ export const LoginPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#06060b] flex items-center justify-center p-4 relative overflow-hidden">
+    <div className="min-h-screen bg-[var(--bg-base)] flex flex-col items-center justify-center p-4 relative overflow-hidden">
+      {/* Theme Toggle for Login Page */}
+      <div className="absolute top-6 right-6 z-50">
+        <button
+          onClick={toggleTheme}
+          className="p-3 bg-[var(--bg-surface)] border border-white/10 rounded-full text-slate-400 hover:text-amber-400 hover:border-amber-400/30 transition-all shadow-xl backdrop-blur-md"
+          title={theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+        >
+          {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
+        </button>
+      </div>
       {/* Background Glows */}
       <div className="absolute top-[20%] left-[20%] w-[500px] h-[500px] bg-violet-600/10 rounded-full blur-[120px] pointer-events-none"></div>
       <div className="absolute bottom-[20%] right-[20%] w-[400px] h-[400px] bg-indigo-600/10 rounded-full blur-[100px] pointer-events-none"></div>
@@ -119,10 +131,10 @@ export const LoginPage: React.FC = () => {
             <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-violet-600 to-indigo-600 flex items-center justify-center shadow-[0_0_25px_rgba(139,92,246,0.4)] mb-6 animate-pulse-glow">
               <Ticket size={28} className="text-white" />
             </div>
-            <h1 className="text-3xl font-bold text-white tracking-tight mb-2">
+            <h1 className="text-3xl font-bold text-[var(--text-primary)] tracking-tight mb-2">
                 {isSignup ? 'Create Account' : 'Welcome Back'}
             </h1>
-            <p className="text-slate-400 text-sm text-center">
+            <p className="text-[var(--text-secondary)] text-sm text-center">
                 {isSignup ? 'Sign up to file your first ticket' : 'Sign in to the Ticketing Management System'}
             </p>
           </div>
@@ -207,7 +219,7 @@ export const LoginPage: React.FC = () => {
                 <button 
                     type="button" 
                     onClick={() => setIsSignup(!isSignup)} 
-                    className="text-slate-400 text-sm hover:text-white transition-colors"
+                    className="text-[var(--text-secondary)] text-sm hover:text-[var(--text-primary)] transition-colors"
                 >
                     {isSignup ? 'Already have an account? Sign In' : "Don't have an account? Sign Up"}
                 </button>
@@ -221,7 +233,7 @@ export const LoginPage: React.FC = () => {
                 <button 
                   onClick={handleGoogleLogin}
                   disabled={googleLoading}
-                  className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition-colors text-sm text-white font-medium group disabled:opacity-60 disabled:cursor-not-allowed"
+                  className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-[var(--bg-surface)] border border-white/10 hover:border-violet-500/30 transition-all text-sm text-[var(--text-primary)] font-medium group disabled:opacity-60 disabled:cursor-not-allowed shadow-sm focus:ring-1 focus:ring-violet-500/20"
                 >
                     {googleLoading ? (
                       <Loader2 className="w-4 h-4 animate-spin" />
@@ -239,7 +251,7 @@ export const LoginPage: React.FC = () => {
                 </button>
                 <button 
                   onClick={() => handleProviderLogin('microsoft')}
-                  className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition-colors text-sm text-white font-medium group"
+                  className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-[var(--bg-surface)] border border-white/10 hover:border-violet-500/30 transition-all text-sm text-[var(--text-primary)] font-medium group shadow-sm focus:ring-1 focus:ring-violet-500/20"
                 >
                     <svg viewBox="0 0 21 21" width="18" height="18" xmlns="http://www.w3.org/2000/svg">
                         <path fill="#f25022" d="M1 1h9v9H1z"/>

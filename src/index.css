@@ -33,18 +33,18 @@
 }
 
 .light {
-  --bg-base: #f8fafc;
+  --bg-base: #f1f5f9;
   --bg-surface: #ffffff;
-  --bg-card: rgba(255, 255, 255, 0.8);
-  --bg-card-hover: rgba(255, 255, 255, 1);
-  --text-primary: #0f172a;
-  --text-secondary: #475569;
+  --bg-card: rgba(255, 255, 255, 0.9);
+  --bg-card-hover: #ffffff;
+  --text-primary: #020617; /* Much darker for readability */
+  --text-secondary: #334155;
   --text-muted: #64748b;
-  --border-glow: 1px solid rgba(139, 92, 246, 0.2);
-  --border-glow-active: 1px solid rgba(139, 92, 246, 0.5);
-  --panel-bg: rgba(255, 255, 255, 0.9);
-  --input-bg: rgba(0, 0, 0, 0.03);
-  --accent-glow: 0 4px 12px rgba(139, 92, 246, 0.1);
+  --border-glow: 1px solid rgba(139, 92, 246, 0.3); /* Stronger borders */
+  --border-glow-active: 1px solid rgba(139, 92, 246, 0.6);
+  --panel-bg: rgba(255, 255, 255, 0.95);
+  --input-bg: #ffffff;
+  --accent-glow: 0 4px 12px rgba(139, 92, 246, 0.15);
 }
 
 * {
@@ -178,7 +178,7 @@ body {
 }
 
 .btn-secondary {
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--input-bg);
   color: var(--text-primary);
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: var(--radius-btn);
@@ -189,6 +189,10 @@ body {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
+}
+
+.light .btn-secondary {
+  border-color: rgba(0, 0, 0, 0.15);
 }
 
 .btn-secondary:hover {
