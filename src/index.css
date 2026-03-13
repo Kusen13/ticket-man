@@ -161,6 +161,68 @@ body {
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
 }
 
+/* Specific Light Mode Polish for Settings & Assignment */
+.light .btn-secondary,
+.light select,
+.light input {
+  color: #000000 !important;
+  border-color: #000000 !important;
+  background-color: #ffffff !important;
+}
+
+/* Multi-select/Assign Select dropdown fix */
+.light select option {
+  background-color: #ffffff;
+  color: #000000;
+}
+
+/* Settings Nav & Section fixes */
+.light [class*="bg-violet-500/10"].text-violet-400 {
+  background-color: #000000 !important;
+  color: #ffffff !important;
+  border-color: #000000 !important;
+}
+
+.light .text-slate-400,
+.light .text-slate-500,
+.light .text-slate-600 {
+  color: #000000 !important;
+  opacity: 1 !important;
+}
+
+/* Badge Polish for Light Mode - Darker colors for readability */
+.light .priority-badge,
+.light .status-badge {
+  color: #000000 !important;
+  border-color: #000000 !important;
+  background-color: rgba(0, 0, 0, 0.05) !important;
+}
+
+/* Explicitly target color-coded text that gets too light */
+.light .text-violet-400, .light .text-cyan-400, .light .text-emerald-400, .light .text-rose-400, .light .text-orange-400 {
+  color: #000000 !important;
+  font-weight: 800 !important;
+}
+
+/* Toggle Switches */
+.light .bg-slate-700 {
+  background-color: #d1d5db !important;
+}
+
+.light .bg-violet-600 {
+  background-color: #000000 !important;
+}
+
+/* Assignment Button Font Fix */
+.light .group\/assign span {
+  color: #000000 !important;
+}
+
+.light .group\/assign:hover span {
+  color: #000000 !important;
+  text-decoration: underline;
+}
+
 /* Form Elements */
 .input-field {
   width: 100%;
