@@ -1,0 +1,389 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* Background Variables */
+  --bg-base: #06060b;
+  --bg-surface: #0e0e18;
+  --bg-card: rgba(18, 18, 30, 0.6);
+  --bg-card-hover: rgba(25, 25, 40, 0.7);
+
+  /* Accent & Glow */
+  --accent-primary: #8b5cf6;
+  --accent-secondary: #a78bfa;
+  --accent-glow: 0 0 20px rgba(139, 92, 246, 0.3);
+  --accent-glow-strong: 0 0 30px rgba(139, 92, 246, 0.5);
+  --border-glow: 1px solid rgba(139, 92, 246, 0.15);
+  --border-glow-active: 1px solid rgba(139, 92, 246, 0.4);
+  
+  /* Text */
+  --text-primary: #f1f5f9;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+
+  /* Status Colors */
+  --status-open: #22d3ee;
+  --status-in-progress: #a78bfa;
+  --status-resolved: #34d399;
+  --status-urgent: #f43f5e;
+
+  /* Common */
+  --radius-card: 12px;
+  --radius-btn: 8px;
+  --font-family: 'Inter', system-ui, sans-serif;
+  
+  /* Navbar / Sidebar Width */
+  --sidebar-width: 260px;
+  --header-height: 70px;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--font-family);
+  background-color: var(--bg-base);
+  color: var(--text-primary);
+  min-height: 100vh;
+  /* Subtle mesh/grid gradient background */
+  background-image: radial-gradient(circle at top right, rgba(139, 92, 246, 0.05) 0%, transparent 40%),
+                    radial-gradient(circle at bottom left, rgba(139, 92, 246, 0.05) 0%, transparent 40%),
+                    linear-gradient(to right, rgba(255, 255, 255, 0.01) 1px, transparent 1px),
+                    linear-gradient(to bottom, rgba(255, 255, 255, 0.01) 1px, transparent 1px);
+  background-size: 100% 100%, 100% 100%, 40px 40px, 40px 40px;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: var(--bg-base);
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* Glassmorphism Utilities */
+.glass-card {
+  background: var(--bg-card);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: var(--border-glow);
+  border-radius: var(--radius-card);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.glass-card:hover {
+  background: var(--bg-card-hover);
+  border: var(--border-glow-active);
+  box-shadow: var(--accent-glow);
+  transform: translateY(-2px);
+}
+
+.glass-panel {
+  background: rgba(10, 10, 15, 0.8);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+/* Form Elements */
+.input-field {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-btn);
+  padding: 0.75rem 1rem;
+  color: var(--text-primary);
+  font-family: inherit;
+  transition: all 0.2s ease;
+  outline: none;
+}
+
+.input-field:focus {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: var(--accent-primary);
+  box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.2);
+}
+
+.input-field::placeholder {
+  color: var(--text-muted);
+}
+
+/* Input with icon inside on the left */
+.input-field.has-icon {
+  padding-left: 2.75rem;
+}
+
+/* Buttons */
+.btn-primary {
+  background: linear-gradient(135deg, #7c3aed, #a78bfa);
+  color: white;
+  border: none;
+  border-radius: var(--radius-btn);
+  padding: 0.75rem 1.5rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  box-shadow: 0 4px 14px rgba(139, 92, 246, 0.4);
+}
+
+.btn-primary:hover {
+  box-shadow: 0 6px 20px rgba(139, 92, 246, 0.6);
+  transform: translateY(-1px);
+}
+
+.btn-primary:active {
+  transform: translateY(1px);
+}
+
+.btn-secondary {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-primary);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-btn);
+  padding: 0.75rem 1.5rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+/* Typography Helpers */
+.text-gradient {
+  background: linear-gradient(135deg, #a78bfa, #c4b5fd);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.heading-lg {
+  font-size: 2rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  margin-bottom: 1rem;
+}
+
+.heading-md {
+  font-size: 1.25rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  margin-bottom: 0.5rem;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideInLeft {
+  from { opacity: 0; transform: translateX(-20px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes pulseGlow {
+  0% { box-shadow: 0 0 0 0 rgba(139, 92, 246, 0.4); }
+  70% { box-shadow: 0 0 0 10px rgba(139, 92, 246, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(139, 92, 246, 0); }
+}
+
+@keyframes shimmer {
+  0% { background-position: -1000px 0; }
+  100% { background-position: 1000px 0; }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.4s ease forwards;
+}
+
+.animate-slide-up {
+  animation: slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.skeleton {
+  background: linear-gradient(90deg, rgba(255,255,255,0.05) 25%, rgba(255,255,255,0.1) 37%, rgba(255,255,255,0.05) 63%);
+  background-size: 1000px 100%;
+  animation: shimmer 2s infinite linear;
+}
+
+/* Print Styles & Reporting */
+@media print {
+  .no-print, 
+  aside, 
+  nav, 
+  header, 
+  button:not(.print-include),
+  .sidebar,
+  .top-bar,
+  svg,
+  img,
+  .rounded-full,
+  .rounded-lg {
+    display: none !important;
+  }
+  
+  body {
+    background: white !important;
+    color: black !important;
+    background-image: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  main {
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 100% !important;
+  }
+
+  .glass-card {
+    background: white !important;
+    border: none !important;
+    box-shadow: none !important;
+    backdrop-filter: none !important;
+    color: black !important;
+    transform: none !important;
+    border-radius: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  /* Reset all gradients and colors to monochrome for print */
+  .text-white, .text-slate-200, .text-slate-300, .text-slate-400, .text-slate-500, .text-slate-600 {
+    color: black !important;
+  }
+
+  .text-violet-400, .text-cyan-400, .text-emerald-400, .text-rose-400, .text-orange-400 {
+    color: #333 !important;
+    font-weight: 600 !important;
+  }
+
+  .bg-violet-500\/10, .bg-emerald-500\/10, .bg-rose-500\/10, .bg-cyan-500\/10, .bg-slate-800\/50 {
+    background: #f8f9fa !important;
+    border: 1px solid #eee !important;
+  }
+
+  /* Table Printing - Clean Excel Layout */
+  table {
+    width: 100% !important;
+    border-spacing: 0 !important;
+    border-collapse: collapse !important;
+    page-break-inside: auto !important;
+    border: 1px solid #000 !important;
+    table-layout: auto !important; /* Allow columns to pack efficiently */
+  }
+  
+  tr {
+    page-break-inside: avoid !important;
+    page-break-after: auto !important;
+    border-bottom: 1px solid #000 !important;
+  }
+
+  thead {
+    display: table-header-group !important;
+  }
+
+  th, td {
+    border: 1px solid #ccc !important;
+    padding: 6px 8px !important;
+    color: black !important;
+    background: transparent !important;
+    text-align: left !important;
+    font-size: 9px !important; /* Slightly smaller to fit 10 columns */
+    white-space: nowrap !important; /* Prevent text from wrapping/splitting */
+    overflow: visible !important;
+    max-width: none !important; /* Remove any truncation limits */
+  }
+  
+  /* Re-balance column weights for print */
+  th:first-child, td:first-child {
+    min-width: 120px !important;
+  }
+  
+  /* Ensure badges are readable but compact - No borders/backgrounds for print */
+  .status-badge, .priority-badge, .duration-badge {
+    padding: 0 !important;
+    font-size: 8.5px !important;
+    border: none !important;
+    background: transparent !important;
+    font-weight: 800 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.025em !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+  }
+
+  /* Optimize vertical alignment for time/date containers */
+  .render-filing-container, .render-resolution-container {
+    gap: 0 !important;
+    min-width: 80px !important;
+  }
+
+  .render-filing-container span, .render-resolution-container span {
+    font-size: 9px !important;
+  }
+  
+  .render-filing-container .font-bold, .render-resolution-container .font-bold {
+    font-size: 10px !important;
+  }
+
+  th {
+    font-weight: bold !important;
+    background-color: #f2f2f2 !important; /* Standard excel header shade */
+    text-transform: none !important;
+    font-size: 11px !important;
+    border: 1px solid #000 !important;
+  }
+
+  /* Ensure detail view prints well */
+  .animate-slide-up, .animate-fade-in {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+
+  /* Spacious spacing for sections */
+  .glass-card {
+    margin-bottom: 2rem !important;
+    padding-bottom: 1rem !important;
+  }
+
+  /* Header adjustments */
+  h1 { font-size: 24pt !important; margin-bottom: 1rem !important; }
+  h2 { font-size: 18pt !important; margin-bottom: 0.75rem !important; }
+
+  /* Page setup */
+  @page {
+    margin: 1cm;
+    size: A4;
+  }
+}
+

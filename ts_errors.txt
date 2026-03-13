@@ -1,0 +1,7 @@
+src/context/DataContext.tsx(85,10): error TS6133: 'loadUsers' is declared but its value is never read.
+src/context/DataContext.tsx(94,10): error TS6133: 'loadDepartments' is declared but its value is never read.
+src/context/DataContext.tsx(103,10): error TS6133: 'loadCategories' is declared but its value is never read.
+src/context/DataContext.tsx(112,10): error TS6133: 'loadConfig' is declared but its value is never read.
+src/context/DataContext.tsx(121,10): error TS6133: 'loadKB' is declared but its value is never read.
+src/context/DataContext.tsx(130,10): error TS6133: 'loadNotifications' is declared but its value is never read.
+src/context/DataContext.tsx(138,10): error TS6133: 'loadMessages' is declared but its value is never read.

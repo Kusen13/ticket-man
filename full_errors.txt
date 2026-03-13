@@ -1,0 +1,5 @@
+src/context/AuthContext.tsx(2,22): error TS2792: Cannot find module '../types'. Did you mean to set the 'moduleResolution' option to 'nodenext', or to add aliases to the 'paths' option?
+src/context/AuthProvider.tsx(4,22): error TS2792: Cannot find module '../types'. Did you mean to set the 'moduleResolution' option to 'nodenext', or to add aliases to the 'paths' option?
+src/context/AuthProvider.tsx(6,14): error TS2322: Type '({ children }: { children: ReactNode; }) => Element' is not assignable to type 'FC<{ children: ReactNode; }>'.
+  Type 'Element' is not assignable to type 'ReactNode'.
+src/lib/supabase.ts(1,30): error TS2792: Cannot find module '@supabase/supabase-js'. Did you mean to set the 'moduleResolution' option to 'nodenext', or to add aliases to the 'paths' option?

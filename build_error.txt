@@ -1,0 +1,6 @@
+src/App.tsx(1,1): error TS6133: 'React' is declared but its value is never read.
+src/components/tickets/TicketList.tsx(6,1): error TS6133: 'mockUsers' is declared but its value is never read.
+src/context/TicketContext.tsx(4,1): error TS6133: 'useAuth' is declared but its value is never read.
+src/pages/LoginPage.tsx(8,9): error TS6133: 'navigate' is declared but its value is never read.
+src/pages/shared/Messages.tsx(5,32): error TS6133: 'UserIcon' is declared but its value is never read.
+src/pages/shared/Messages.tsx(64,35): error TS6133: 'i' is declared but its value is never read.
