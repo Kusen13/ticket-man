@@ -172,9 +172,8 @@ export const AdminTickets: React.FC = () => {
           <span className="text-xs text-slate-500 ml-auto">{filteredTickets.length} tickets</span>
         </div>
 
-        {/* Table */}
-        {/* Desktop Table View */}
-        <div className="hidden lg:block overflow-x-auto">
+        {/* Table View */}
+        <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse min-w-[1000px]">
             <thead>
               <tr className="bg-white/[0.02] border-b border-white/5 text-xs font-semibold text-slate-400 uppercase tracking-wider">
@@ -199,8 +198,6 @@ export const AdminTickets: React.FC = () => {
                 </tr>
               ) : (
                 filteredTickets.map(ticket => {
-                  const assignedUser = users.find(u => u.id === ticket.assignedTo);
-
                   return (
                     <tr key={ticket.id} className="hover:bg-white/[0.02] transition-colors group">
                       <td className="p-4 pl-6">
@@ -226,14 +223,62 @@ export const AdminTickets: React.FC = () => {
                         <Countdown deadline={ticket.deadline} status={ticket.status} />
                       </td>
                       <td className="p-4">
-                        <button onClick={() => setAssigningTicketId(ticket.id)} className="flex items-center gap-2 text-xs text-slate-400 hover:text-violet-300 transition-colors">
-                          {assignedUser ? (
-                            <>
-                              <img src={assignedUser.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(assignedUser.name)}&background=8b5cf6&color=fff`} className="w-6 h-6 rounded-full border border-white/10" alt="" />
-                              <span>{assignedUser.name}</span>
-                            </>
-                          ) : 'Assign'}
-                        </button>
+                        <div className="relative inline-block w-[140px]">
+                          {ticket.assignedTo ? (
+                            <button
+                              onClick={(e) => { e.stopPropagation(); setAssigningTicketId(ticket.id); }}
+                              className="w-full flex items-center justify-between gap-2 px-3 py-1.5 bg-slate-900 border border-slate-700 hover:border-violet-500 rounded-lg text-xs text-slate-300 transition-colors"
+                            >
+                              <div className="flex items-center gap-2 truncate">
+                                <img src={users.find(u => u.id === ticket.assignedTo)?.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(users.find(u => u.id === ticket.assignedTo)?.name || 'U')}&background=8b5cf6&color=fff`} className="w-5 h-5 rounded-full shrink-0" alt="" />
+                                <span className="truncate">{users.find(u => u.id === ticket.assignedTo)?.name}</span>
+                              </div>
+                              <ChevronDown size={14} className="text-slate-500 shrink-0" />
+                            </button>
+                          ) : (
+                            <button
+                              onClick={(e) => { e.stopPropagation(); setAssigningTicketId(ticket.id); }}
+                              className="w-full flex items-center justify-between gap-2 px-3 py-1.5 bg-violet-500/10 border border-violet-500/30 hover:border-violet-500 rounded-lg text-xs text-violet-400 transition-colors"
+                            >
+                              <div className="flex items-center gap-2">
+                                <UserCheck size={14} />
+                                <span>Assign</span>
+                              </div>
+                              <ChevronDown size={14} className="text-violet-500 shrink-0" />
+                            </button>
+                          )}
+                          
+                          {assigningTicketId === ticket.id && (
+                            <select
+                              value=""
+                              onClick={(e) => e.stopPropagation()}
+                              onChange={(e) => {
+                                e.stopPropagation();
+                                const val = e.target.value;
+                                if (!val) {
+                                  setAssigningTicketId(null);
+                                  return;
+                                }
+                                const selectedUserId = val === 'unassign' ? '' : val;
+                                const uName = selectedUserId ? users.find(u => u.id === selectedUserId)?.name || 'Unknown' : 'Unassigned';
+                                setConfirmAssignData({ ticketId: ticket.id, userId: selectedUserId, userName: uName });
+                              }}
+                              autoFocus
+                              onBlur={(e) => {
+                                if (!e.relatedTarget) setTimeout(() => setAssigningTicketId(null), 200);
+                              }}
+                              className="absolute inset-0 opacity-0 cursor-pointer w-full z-10"
+                            >
+                              <option value="">Select Resolver...</option>
+                              <option value="unassign">Unassigned</option>
+                              {users.filter(u => u.departmentId === ticket.departmentId && (u.role === 'EMPLOYEE' || u.role === 'ADMIN')).filter(r => r.id !== ticket.createdBy).map(r => (
+                                <option key={r.id} value={r.id}>
+                                  {r.name} {r.id === ticket.assignedTo ? '(Current)' : ''}
+                                </option>
+                              ))}
+                            </select>
+                          )}
+                        </div>
                       </td>
                       <td className="p-4 text-xs text-slate-400">
                         {dayjs(ticket.createdAt).format('MM/DD HH:mm')}
@@ -254,48 +299,6 @@ export const AdminTickets: React.FC = () => {
               )}
             </tbody>
           </table>
-        </div>
-        {/* Mobile List View */}
-        <div className="lg:hidden divide-y divide-white/5">
-          {filteredTickets.length === 0 ? (
-            <div className="p-12 text-center text-slate-500">No tickets found.</div>
-          ) : (
-            filteredTickets.map(ticket => (
-              <div key={ticket.id} className="p-4 space-y-4 hover:bg-white/[0.01] transition-colors" onClick={() => navigate(`/admin/tickets/${ticket.id}`)}>
-                <div className="flex items-start justify-between gap-3">
-                  <div className="min-w-0">
-                    <p className="text-sm font-bold text-violet-400 font-mono tracking-wider">
-                      {formatTicketId(ticket.ticketNumber || ticket.id)}
-                    </p>
-                    <h4 className="text-sm font-medium text-white truncate mt-0.5">{ticket.title}</h4>
-                  </div>
-                  <PriorityBadge priority={ticket.priority} />
-                </div>
-                
-                <div className="flex items-center justify-between text-xs text-slate-400">
-                  <div className="flex items-center gap-2">
-                    <StatusBadge status={ticket.status} size="sm" />
-                    <span>{dayjs(ticket.createdAt).format('MMM D')}</span>
-                  </div>
-                  <div className="flex items-center gap-1.5">
-                    <Countdown deadline={ticket.deadline} status={ticket.status} size="sm" createdAt={ticket.createdAt} updatedAt={ticket.updatedAt} />
-                  </div>
-                </div>
-
-                <div className="flex items-center justify-between pt-2 border-t border-white/5">
-                  <div className="flex items-center gap-2">
-                    <div className="w-6 h-6 rounded-full bg-slate-800 flex items-center justify-center border border-white/10">
-                      <Users size={12} className="text-slate-500" />
-                    </div>
-                    <span className="text-xs text-slate-300">
-                      {users.find(u => u.id === ticket.assignedTo)?.name || 'Unassigned'}
-                    </span>
-                  </div>
-                  <button className="text-xs font-semibold text-violet-400">View Details →</button>
-                </div>
-              </div>
-            ))
-          )}
         </div>
       </div>
 
