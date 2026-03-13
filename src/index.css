@@ -84,9 +84,18 @@ body {
 .light .text-slate-200,
 .light .text-slate-300,
 .light .text-slate-400,
-.light .text-slate-500,
-.light .text-white {
+.light .text-slate-500 {
   color: #000000 !important;
+}
+
+/* Specific protection for white text that MUST stay white on colored backgrounds */
+.light .text-white,
+.light [class*="bg-amber-"] *,
+.light [class*="bg-violet-"] *,
+.light [class*="bg-rose-"] *,
+.light [class*="bg-emerald-"] *,
+.light [class*="bg-cyan-"] * {
+  color: #ffffff !important;
 }
 
 /* Force Table and Card Headers to Black */
@@ -100,33 +109,58 @@ body {
 .light .glass-card,
 .light .glass-panel,
 .light .input-field,
+.light [class*="border-white/"],
 .light .border-white\/5,
 .light .border-white\/10 {
   border-color: #000000 !important;
+}
+
+.light .glass-card,
+.light .glass-panel,
+.light .input-field {
   background-color: #ffffff !important;
 }
 
-.light .bg-slate-800\/50,
-.light .bg-slate-900\/50 {
-  background-color: #1a1a1c !important; /* Restore dark contrast components per request */
-  color: #ffffff !important;
-  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+/* Turn dark slate backgrounds into white for light mode readability */
+.light [class*="bg-slate-"] {
+  background-color: #ffffff !important;
+  color: #000000 !important;
+  border-color: #000000 !important;
 }
 
-.light .bg-slate-800\/50 *,
-.light .bg-slate-900\/50 *,
+/* Ensure ALL text inside these dark containers is specifically white in light mode */
+.light .dark-contrast-nav {
+  background-color: #1a1a1c !important;
+  border-color: rgba(255, 255, 255, 0.2) !important;
+}
+
+.light [class*="bg-amber-"],
+.light [class*="bg-violet-"],
+.light [class*="bg-rose-"],
+.light [class*="bg-emerald-"],
+.light [class*="bg-cyan-"],
+.light .btn-primary,
+.light .btn-danger {
+  /* Defined below to ensure white text in colored backgrounds */
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+/* FORCE WHITE TEXT inside the safe zones */
+.light .dark-contrast-nav *,
+.light [class*="bg-amber-"] *,
+.light [class*="bg-violet-"] *,
+.light [class*="bg-rose-"] *,
+.light [class*="bg-emerald-"] *,
+.light [class*="bg-cyan-"] *,
 .light .btn-primary,
 .light .btn-primary *,
 .light .btn-danger,
-.light .btn-danger *,
-.light .bg-violet-600 *,
-.light .bg-amber-600 *,
-.light .bg-rose-600 * {
-  color: #ffffff !important; /* Force white text for dark/accent backgrounds only */
+.light .btn-danger * {
+  color: #ffffff !important;
 }
 
 .light .light-tab {
-  color: rgba(255, 255, 255, 0.6) !important;
+  color: rgba(255, 255, 255, 0.5) !important;
 }
 
 .light .light-tab:hover {
@@ -135,6 +169,17 @@ body {
 
 .light .active-light-tab {
   color: #ffffff !important;
+  background-color: var(--accent-primary) !important;
+}
+
+.light .btn-primary:not([class*="bg-emerald"]):not([class*="bg-rose"]):not([class*="bg-amber"]) {
+  background: #000000 !important;
+  color: #ffffff !important;
+  border: 1px solid #000000 !important;
+}
+
+.light .btn-primary:hover {
+  opacity: 0.9;
 }
 
 /* Removed forced white text to prevent invisible headers in Light Mode */
@@ -218,6 +263,7 @@ body {
   color: #000000 !important;
   border-color: #000000 !important;
   background-color: rgba(0, 0, 0, 0.05) !important;
+  font-weight: 800 !important;
 }
 
 .light .text-violet-400, .light .text-violet-500, .light .text-violet-600 {

@@ -135,7 +135,7 @@ export const UserManagement: React.FC = () => {
             <h1 className="text-3xl font-bold tracking-tight text-white mb-2">User Management</h1>
             <p className="text-slate-400">Create, edit, and manage all user accounts and their roles.</p>
           </div>
-          <div className="flex bg-slate-900/50 p-1 rounded-xl border border-white/5 self-start overflow-x-auto max-w-full">
+          <div className="flex bg-slate-900/50 p-1 rounded-xl border border-white/5 self-start overflow-x-auto max-w-full dark-contrast-nav">
             <button
               onClick={() => setActiveTab('approved')}
               className={`px-4 py-2 text-sm font-bold rounded-lg transition-all ${

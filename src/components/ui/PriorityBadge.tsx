@@ -14,7 +14,7 @@ export const PriorityBadge: React.FC<{ priority: Priority }> = ({ priority }) =>
       icon: AlertTriangle
     },
     MEDIUM: {
-      color: 'bg-blue-400/10 text-blue-400 border-blue-400/20',
+      color: 'bg-amber-400/10 text-amber-400 border-amber-400/20',
       icon: Info
     },
     LOW: {
