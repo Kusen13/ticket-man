@@ -73,116 +73,148 @@ body {
 }
 
 
-/* Global Light Mode Overrides */
+/* ═══════════════════════════════════════════════
+   LIGHT MODE — Complete Text & Color Overrides
+   ═══════════════════════════════════════════════ */
+
+/* 1. Background & base */
 .light body {
   background-image: none !important;
   background-color: var(--bg-base) !important;
 }
 
+/* 2. Force ALL text to dark by default — this is the nuclear fix */
+.light * {
+  color: #1a1a2e;
+}
+
+/* 3. Specifically kill every white/slate text utility */
+.light .text-white,
 .light .text-slate-50,
 .light .text-slate-100,
 .light .text-slate-200,
 .light .text-slate-300,
 .light .text-slate-400,
-.light .text-slate-500 {
-  color: #000000 !important;
+.light .text-slate-500,
+.light .text-slate-600 {
+  color: #1a1a2e !important;
 }
 
-/* Specific protection for white text that MUST stay white on colored backgrounds */
-.light .text-white,
-.light [class*="bg-amber-"] *,
-.light [class*="bg-violet-"] *,
-.light [class*="bg-rose-"] *,
-.light [class*="bg-emerald-"] *,
-.light [class*="bg-cyan-"] * {
-  color: #ffffff !important;
+/* 4. Headings, table cells, paragraphs — always dark */
+.light h1, .light h2, .light h3, .light h4, .light h5,
+.light th, .light td, .light label, .light p, .light span, .light a {
+  color: #1a1a2e !important;
 }
 
-/* Force Table and Card Headers to Black */
-.light th,
-.light td,
-.light h1, .light h2, .light h3, .light h4 {
-  color: #000000 !important;
-}
-
-/* Black Outlines for Semi-White Background */
-.light .glass-card,
-.light .glass-panel,
-.light .input-field,
-.light [class*="border-white/"],
-.light .border-white\/5,
-.light .border-white\/10 {
-  border-color: #000000 !important;
-}
-
+/* 5. Cards and panels → white background, dark border */
 .light .glass-card,
 .light .glass-panel,
 .light .input-field {
   background-color: #ffffff !important;
+  border-color: rgba(0, 0, 0, 0.18) !important;
+  color: #1a1a2e !important;
 }
 
-/* Turn dark slate backgrounds into white for light mode readability */
+/* 6. All slate-* backgrounds → white */
 .light [class*="bg-slate-"] {
   background-color: #ffffff !important;
-  color: #000000 !important;
-  border-color: #000000 !important;
+  border-color: rgba(0, 0, 0, 0.12) !important;
 }
 
-/* Ensure ALL text inside these dark containers is specifically white in light mode */
+/* 7. Borders that use white/transparent — make them visible */
+.light [class*="border-white"],
+.light [class*="divide-white"] {
+  border-color: rgba(0, 0, 0, 0.15) !important;
+}
+
+/* 8. Inputs, textareas, selects */
+.light input,
+.light textarea,
+.light select {
+  background-color: #ffffff !important;
+  border-color: rgba(0, 0, 0, 0.25) !important;
+  color: #1a1a2e !important;
+}
+
+.light select option {
+  background-color: #ffffff;
+  color: #1a1a2e;
+}
+
+/* 9. Priority & status text — darker shades of their accent colors */
+.light .text-violet-400, .light .text-violet-500, .light .text-violet-600 {
+  color: #5b21b6 !important;
+}
+.light .text-rose-400, .light .text-rose-500, .light .text-rose-600 {
+  color: #b91c1c !important;
+}
+.light .text-emerald-400, .light .text-emerald-500, .light .text-emerald-600 {
+  color: #15803d !important;
+}
+.light .text-cyan-400, .light .text-cyan-500, .light .text-cyan-600 {
+  color: #0e7490 !important;
+}
+.light .text-amber-400, .light .text-amber-500, .light .text-amber-600 {
+  color: #b45309 !important;
+}
+.light .text-orange-400, .light .text-orange-500, .light .text-orange-600 {
+  color: #c2410c !important;
+}
+.light .text-blue-400, .light .text-blue-500, .light .text-blue-600 {
+  color: #1e40af !important;
+}
+
+/* 10. Buttons — dark background, white text */
+.light .btn-primary {
+  background-color: #0f172a !important;
+  color: #ffffff !important;
+  border-color: #0f172a !important;
+}
+.light .btn-primary:hover {
+  background-color: #1e293b !important;
+  color: #ffffff !important;
+}
+.light .btn-danger {
+  background-color: #be123c !important;
+  color: #ffffff !important;
+  border-color: #be123c !important;
+}
+
+/* 11. The dark tab nav in User Management — stays dark with white text */
 .light .dark-contrast-nav {
   background-color: #1a1a1c !important;
-  border-color: rgba(255, 255, 255, 0.2) !important;
+  border-color: rgba(255, 255, 255, 0.15) !important;
 }
-
-.light [class*="bg-amber-"],
-.light [class*="bg-violet-"],
-.light [class*="bg-rose-"],
-.light [class*="bg-emerald-"],
-.light [class*="bg-cyan-"],
-.light .btn-primary,
-.light .btn-danger {
-  /* Defined below to ensure white text in colored backgrounds */
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-}
-
-/* FORCE WHITE TEXT inside the safe zones */
-.light .dark-contrast-nav *,
-.light [class*="bg-amber-"] *,
-.light [class*="bg-violet-"] *,
-.light [class*="bg-rose-"] *,
-.light [class*="bg-emerald-"] *,
-.light [class*="bg-cyan-"] *,
-.light .btn-primary,
-.light .btn-primary *,
-.light .btn-danger,
-.light .btn-danger * {
+.light .dark-contrast-nav button,
+.light .dark-contrast-nav span {
   color: #ffffff !important;
 }
 
+/* 12. Light-tab states (inside dark-contrast-nav) */
 .light .light-tab {
-  color: rgba(255, 255, 255, 0.5) !important;
+  color: rgba(255, 255, 255, 0.55) !important;
 }
-
 .light .light-tab:hover {
   color: #ffffff !important;
 }
-
 .light .active-light-tab {
   color: #ffffff !important;
   background-color: var(--accent-primary) !important;
 }
 
-.light .btn-primary:not([class*="bg-emerald"]):not([class*="bg-rose"]):not([class*="bg-amber"]) {
-  background: #000000 !important;
-  color: #ffffff !important;
-  border: 1px solid #000000 !important;
+/* 13. Secondary button */
+.light .btn-secondary {
+  background-color: #f1f5f9 !important;
+  color: #1a1a2e !important;
+  border-color: rgba(0, 0, 0, 0.2) !important;
 }
 
-.light .btn-primary:hover {
-  opacity: 0.9;
+/* 14. Priority & status badges */
+.light .priority-badge,
+.light .status-badge {
+  font-weight: 700 !important;
 }
 
-/* Removed forced white text to prevent invisible headers in Light Mode */
 
 /* Scrollbar */
 ::-webkit-scrollbar {
@@ -228,77 +260,11 @@ body {
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
 }
 
-/* Specific Light Mode Polish for Settings & Assignment */
-.light .btn-secondary,
-.light select,
-.light input {
-  color: #000000 !important;
-  border-color: #000000 !important;
-  background-color: #ffffff !important;
-}
-
-/* Multi-select/Assign Select dropdown fix */
-.light select option {
-  background-color: #ffffff;
-  color: #000000;
-}
-
-/* Settings Nav & Section fixes */
+/* Settings Nav active icon */
 .light [class*="bg-violet-500/10"].text-violet-400 {
-  background-color: #000000 !important;
-  color: #ffffff !important;
-  border-color: #000000 !important;
-}
-
-.light .text-slate-400,
-.light .text-slate-500,
-.light .text-slate-600 {
-  color: #000000 !important;
-  opacity: 1 !important;
-}
-
-/* Badge Polish for Light Mode - Darker colors for readability */
-.light .priority-badge,
-.light .status-badge {
-  color: #000000 !important;
-  border-color: #000000 !important;
-  background-color: rgba(0, 0, 0, 0.05) !important;
-  font-weight: 800 !important;
-}
-
-.light .text-violet-400, .light .text-violet-500, .light .text-violet-600 {
-  color: #5b21b6 !important; /* Darker Violet */
-  font-weight: 800 !important;
-}
-
-.light .text-rose-400, .light .text-rose-500, .light .text-rose-600 {
-  color: #b91c1c !important; /* Darker Red/Rose */
-  font-weight: 800 !important;
-}
-
-.light .text-emerald-400, .light .text-emerald-500, .light .text-emerald-600 {
-  color: #15803d !important; /* Darker Green/Emerald */
-  font-weight: 800 !important;
-}
-
-.light .text-cyan-400, .light .text-cyan-500, .light .text-cyan-600 {
-  color: #0e7490 !important; /* Darker Cyan */
-  font-weight: 800 !important;
-}
-
-.light .text-orange-400, .light .text-orange-500, .light .text-orange-600 {
-  color: #c2410c !important; /* Darker Orange */
-  font-weight: 800 !important;
-}
-
-.light .text-amber-400, .light .text-amber-500, .light .text-amber-600 {
-  color: #b45309 !important; /* Dark Amber */
-  font-weight: 800 !important;
-}
-
-.light .text-blue-400, .light .text-blue-500, .light .text-blue-600 {
-  color: #1e3a8a !important; /* Darker Blue */
-  font-weight: 800 !important;
+  background-color: rgba(91, 33, 182, 0.12) !important;
+  color: #5b21b6 !important;
+  border-color: rgba(91, 33, 182, 0.3) !important;
 }
 
 /* Toggle Switches */
@@ -306,17 +272,13 @@ body {
   background-color: #d1d5db !important;
 }
 
-.light .bg-violet-600 {
-  background-color: #000000 !important;
-}
-
 /* Assignment Button Font Fix */
 .light .group\/assign span {
-  color: #000000 !important;
+  color: #1a1a2e !important;
 }
 
 .light .group\/assign:hover span {
-  color: #000000 !important;
+  color: #1a1a2e !important;
   text-decoration: underline;
 }
 
