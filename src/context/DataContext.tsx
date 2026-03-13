@@ -285,14 +285,14 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (files && files.length > 0) {
         for (const file of files) {
           const fileName = `${conversationId}/${Math.random().toString(36).substring(2, 15)}_${Date.now()}.${file.name.split('.').pop()}`;
-          const { data: uploadData, error: uploadError } = await supabase.storage.from('message-attachments').upload(fileName, file);
+          const { data: uploadData, error: _uploadError } = await supabase.storage.from('message-attachments').upload(fileName, file);
           if (uploadData) {
             const { data: { publicUrl } } = supabase.storage.from('message-attachments').getPublicUrl(uploadData.path);
             uploadedAttachments.push({ id: Math.random().toString(36).substring(2, 11), name: file.name, type: file.type, size: file.size, url: publicUrl, createdAt: new Date().toISOString() });
           }
         }
       }
-      const { data, error } = await supabase.from('messages').insert([{ conversation_id: conversationId, sender_id: senderId, receiver_id: receiverId, content, attachments: uploadedAttachments, is_read: false }]).select().single();
+      const { data, error: _msgError } = await supabase.from('messages').insert([{ conversation_id: conversationId, sender_id: senderId, receiver_id: receiverId, content, attachments: uploadedAttachments, is_read: false }]).select().single();
       if (data) {
         setMessages(prev => [...prev, { id: data.id, conversationId: data.conversation_id, senderId: data.sender_id, receiverId: data.receiver_id, content: data.content, attachments: data.attachments || [], isRead: data.is_read, createdAt: data.created_at }]);
         addNotification(receiverId, 'New Message', `You received a new message from ${getUserById(senderId)?.name || 'Someone'}`, 'MENTION', `/${getUserById(receiverId)?.role.toLowerCase()}/messages`);

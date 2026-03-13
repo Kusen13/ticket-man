@@ -173,7 +173,7 @@ export const TicketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     const createdAt = new Date().toISOString();
     const deadline = calculateDeadline(ticket.priority, createdAt, config.slaRules);
     try {
-      const { data: newDbTicket, error } = await supabase.from('tickets').insert({ title: ticket.title, description: ticket.description, priority: ticket.priority, status: 'OPEN', department_id: ticket.departmentId || null, category_id: ticket.categoryId || null, custom_category: ticket.customCategory || null, created_by: user.id, deadline }).select().single();
+      const { data: newDbTicket, error: _ticketError } = await supabase.from('tickets').insert({ title: ticket.title, description: ticket.description, priority: ticket.priority, status: 'OPEN', department_id: ticket.departmentId || null, category_id: ticket.categoryId || null, custom_category: ticket.customCategory || null, created_by: user.id, deadline }).select().single();
       if (newDbTicket) {
         const uploadedAttachments: import('../types').Attachment[] = [];
         if (files && files.length > 0) {
