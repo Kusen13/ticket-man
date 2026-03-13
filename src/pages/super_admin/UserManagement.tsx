@@ -129,13 +129,13 @@ export const UserManagement: React.FC = () => {
   return (
     <div className="space-y-6 animate-fade-in">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div className="flex items-center gap-6">
-          <div>
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+        <div className="flex flex-col md:flex-row md:items-center gap-4 md:gap-6 w-full">
+          <div className="flex-1">
             <h1 className="text-3xl font-bold tracking-tight text-white mb-2">User Management</h1>
             <p className="text-slate-400">Create, edit, and manage all user accounts and their roles.</p>
           </div>
-          <div className="flex bg-slate-900/50 p-1 rounded-xl border border-white/5 ml-4">
+          <div className="flex bg-slate-900/50 p-1 rounded-xl border border-white/5 self-start overflow-x-auto max-w-full">
             <button
               onClick={() => setActiveTab('approved')}
               className={`px-4 py-2 text-sm font-medium rounded-lg transition-all ${
@@ -163,7 +163,7 @@ export const UserManagement: React.FC = () => {
             </button>
           </div>
         </div>
-        <button onClick={openAddModal} className="btn-primary">
+        <button onClick={openAddModal} className="btn-primary shrink-0 self-start lg:self-auto">
           <UserPlus size={18} /> Add New User
         </button>
       </div>
@@ -187,7 +187,7 @@ export const UserManagement: React.FC = () => {
       <div className="glass-card overflow-hidden">
         {/* Filters Row */}
         <div className="p-4 border-b border-white/5 flex flex-wrap gap-3 items-center">
-          <div className="relative flex-1 min-w-[200px]">
+          <div className="relative w-full sm:flex-1 min-w-[200px]">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 w-4 h-4" />
             <input
               type="text"
@@ -197,7 +197,7 @@ export const UserManagement: React.FC = () => {
               className="w-full bg-slate-900/50 border border-white/10 rounded-lg py-2 pl-9 pr-4 text-sm text-white focus:outline-none focus:border-violet-500/50 transition-colors"
             />
           </div>
-          <div className="relative">
+          <div className="relative w-full sm:w-auto">
             <select
               value={roleFilter}
               onChange={e => setRoleFilter(e.target.value as Role | 'ALL')}
@@ -208,7 +208,7 @@ export const UserManagement: React.FC = () => {
             </select>
             <ChevronDown size={14} className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-500 pointer-events-none" />
           </div>
-          <div className="relative">
+          <div className="relative w-full sm:w-auto">
             <select
               value={deptFilter}
               onChange={e => setDeptFilter(e.target.value)}
@@ -219,7 +219,7 @@ export const UserManagement: React.FC = () => {
             </select>
             <ChevronDown size={14} className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-500 pointer-events-none" />
           </div>
-          <span className="text-xs text-slate-500 ml-auto">{filteredUsers.length} of {activeTab === 'requests' ? accessRequests.length : users.length} {activeTab === 'requests' ? 'requests' : 'users'}</span>
+          <span className="text-xs text-slate-500 w-full sm:w-auto sm:ml-auto text-left sm:text-right">{filteredUsers.length} of {activeTab === 'requests' ? accessRequests.length : users.length} {activeTab === 'requests' ? 'requests' : 'users'}</span>
         </div>
 
         {/* Table */}

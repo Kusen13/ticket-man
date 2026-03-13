@@ -119,7 +119,7 @@ export const SuperAdminTickets: React.FC = () => {
       <div className="glass-card overflow-hidden">
         {/* Filters */}
         <div className="p-4 border-b border-white/5 flex flex-wrap gap-3 items-center">
-          <div className="relative flex-1 min-w-[180px]">
+          <div className="relative w-full sm:flex-1 min-w-[180px]">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 w-4 h-4" />
             <input
               type="text"
@@ -129,40 +129,40 @@ export const SuperAdminTickets: React.FC = () => {
               className="w-full bg-slate-900/50 border border-white/10 rounded-lg py-2 pl-9 pr-4 text-sm text-white focus:outline-none focus:border-violet-500/50"
             />
           </div>
-          <div className="relative">
+          <div className="relative w-full sm:w-auto">
             <select
               value={deptFilter}
               onChange={e => setDeptFilter(e.target.value)}
-              className="appearance-none bg-slate-900/50 border border-white/10 rounded-lg py-2 pl-3 pr-8 text-sm text-slate-300 focus:outline-none cursor-pointer"
+              className="w-full sm:w-auto appearance-none bg-slate-900/50 border border-white/10 rounded-lg py-2 pl-3 pr-8 text-sm text-slate-300 focus:outline-none cursor-pointer"
             >
               <option value="ALL">All Departments</option>
               {departments.map(d => <option key={d.id} value={d.id}>{d.name}</option>)}
             </select>
             <ChevronDown size={13} className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-500 pointer-events-none" />
           </div>
-          <div className="relative">
+          <div className="relative w-full sm:w-auto">
             <select
               value={statusFilter}
               onChange={e => setStatusFilter(e.target.value)}
-              className="appearance-none bg-slate-900/50 border border-white/10 rounded-lg py-2 pl-3 pr-8 text-sm text-slate-300 focus:outline-none cursor-pointer"
+              className="w-full sm:w-auto appearance-none bg-slate-900/50 border border-white/10 rounded-lg py-2 pl-3 pr-8 text-sm text-slate-300 focus:outline-none cursor-pointer"
             >
               <option value="ALL">All Status</option>
               {STATUS_OPTIONS.map(s => <option key={s} value={s}>{s.replace('_', ' ')}</option>)}
             </select>
             <ChevronDown size={13} className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-500 pointer-events-none" />
           </div>
-          <div className="relative">
+          <div className="relative w-full sm:w-auto">
             <select
               value={priorityFilter}
               onChange={e => setPriorityFilter(e.target.value)}
-              className="appearance-none bg-slate-900/50 border border-white/10 rounded-lg py-2 pl-3 pr-8 text-sm text-slate-300 focus:outline-none cursor-pointer"
+              className="w-full sm:w-auto appearance-none bg-slate-900/50 border border-white/10 rounded-lg py-2 pl-3 pr-8 text-sm text-slate-300 focus:outline-none cursor-pointer"
             >
               <option value="ALL">All Priority</option>
               {['URGENT', 'HIGH', 'MEDIUM', 'LOW'].map(p => <option key={p} value={p}>{p}</option>)}
             </select>
             <ChevronDown size={13} className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-500 pointer-events-none" />
           </div>
-          <span className="text-xs text-slate-500 ml-auto">{filteredTickets.length} of {tickets.length} tickets</span>
+          <span className="text-xs text-slate-500 w-full sm:w-auto sm:ml-auto text-left sm:text-right">{filteredTickets.length} of {tickets.length} tickets</span>
         </div>
 
         {/* Table */}
