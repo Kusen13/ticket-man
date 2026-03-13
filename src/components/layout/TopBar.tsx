@@ -7,7 +7,7 @@ import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
 import { useTickets } from '../../hooks/useTickets';
 import { useTheme } from '../../context/ThemeContext';
-import { Ticket } from '../../types';
+import { Ticket, Notification } from '../../types';
 import clsx from 'clsx';
 
 dayjs.extend(relativeTime);
@@ -80,7 +80,7 @@ export const TopBar: React.FC<TopBarProps> = ({ isCollapsed, onOpenMobileMenu })
   const unreadNotifications = userNotifications.filter(n => !n.isRead).sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
   const unreadCount = unreadNotifications.length;
 
-  const handleNotificationClick = (notif: any) => {
+  const handleNotificationClick = (notif: Notification) => {
     if (!notif.isRead) markNotificationRead(notif.id);
     setShowNotifications(false);
     if (notif.link) {
@@ -146,7 +146,7 @@ export const TopBar: React.FC<TopBarProps> = ({ isCollapsed, onOpenMobileMenu })
             />
 
             {/* Search Results Dropdown */}
-            {showSearchResults && searchResults.length > 0 && (
+            {showSearchResults && searchQuery.trim() !== '' && searchResults.length > 0 && (
               <div className="absolute top-[calc(100%+8px)] left-0 w-full glass-panel border border-white/10 rounded-xl overflow-hidden shadow-2xl animate-fade-in origin-top">
                 <div className="p-2 divide-y divide-white/5">
                   {searchResults.map((result) => (
