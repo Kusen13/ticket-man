@@ -33,18 +33,18 @@
 }
 
 .light {
-  --bg-base: #ffffff;
-  --bg-surface: #ffffff;
-  --bg-card: #ffffff;
-  --bg-card-hover: #f8fafc;
-  --text-primary: #000000; /* Absolute Black */
-  --text-secondary: #000000; /* Absolute Black */
-  --text-muted: #1a1a1a; /* Very Dark Gray for hints */
-  --border-glow: 1px solid #000000; /* Pure Black Borders */
+  --bg-base: #ffffff; /* Pure White */
+  --bg-surface: #ffffff; /* Pure White */
+  --bg-card: #ffffff; /* Pure White */
+  --bg-card-hover: #ffffff; /* Pure White */
+  --text-primary: #000000;
+  --text-secondary: #000000;
+  --text-muted: #000000; /* Force all hints to black */
+  --border-glow: 1px solid #000000;
   --border-glow-active: 2px solid #000000;
-  --panel-bg: #ffffff;
-  --input-bg: #ffffff;
-  --accent-glow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+  --panel-bg: #ffffff; /* Pure White */
+  --input-bg: #ffffff; /* Pure White */
+  --accent-glow: 0 2px 4px 0 rgba(0, 0, 0, 0.1);
 }
 
 * {
@@ -72,10 +72,23 @@ body {
 }
 
 .light body {
-  background-image: radial-gradient(circle at top right, rgba(139, 92, 246, 0.08) 0%, transparent 40%),
-                    radial-gradient(circle at bottom left, rgba(139, 92, 246, 0.08) 0%, transparent 40%),
-                    linear-gradient(to right, rgba(0, 0, 0, 0.05) 1px, transparent 1px),
-                    linear-gradient(to bottom, rgba(0, 0, 0, 0.05) 1px, transparent 1px);
+  background-image: none !important; /* Remove all gray mesh/grids */
+  background-color: #ffffff !important;
+}
+
+/* Global Light Mode Force - Overrides all Slates and Grays */
+.light,
+.light body,
+.light .bg-slate-50,
+.light .bg-slate-100,
+.light .bg-slate-200,
+.light .bg-slate-800\/50,
+.light .bg-slate-900\/50,
+.light .bg-gray-50,
+.light .bg-gray-100,
+.light .bg-white\/5,
+.light .bg-white\/10 {
+  background-color: #ffffff !important;
 }
 
 /* Force All Fonts to Black in Light Mode */
@@ -169,8 +182,8 @@ body {
 
 .light .input-field {
   border: 1px solid #000000; /* Bold black borders */
-  background: #ffffff;
-  color: #000000;
+  background: #ffffff !important;
+  color: #000000 !important;
 }
 
 .input-field:focus {
