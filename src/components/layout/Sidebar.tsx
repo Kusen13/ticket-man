@@ -118,14 +118,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         </div>
         
         {/* Toggle trigger (desktop only) */}
-        {!isMobileOpen && (
-          <div className={clsx(
-            "absolute right-2 top-1/2 -translate-y-1/2 p-1.5 rounded-full bg-white/5 border border-white/5 text-slate-500 opacity-0 group-hover:opacity-100 transition-all",
-            isCollapsed && "rotate-180"
-          )}>
-            <Building2 size={12} />
-          </div>
-        )}
+
       </div>
 
       {/* Navigation */}

@@ -2,11 +2,12 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useAuth } from '../../hooks/useAuth';
 import { useData } from '../../hooks/useData';
 import { useNavigate } from 'react-router-dom';
-import { Bell, Search, CheckCircle2, AlertCircle, MessageSquare, Info, Menu, RefreshCw, Sun, Moon } from 'lucide-react';
+import { Bell, Search, CheckCircle2, AlertCircle, MessageSquare, Info, Menu, RefreshCw, Sun, Moon, Ticket as TicketIcon } from 'lucide-react';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
 import { useTickets } from '../../hooks/useTickets';
 import { useTheme } from '../../context/ThemeContext';
+import { Ticket } from '../../types';
 import clsx from 'clsx';
 
 dayjs.extend(relativeTime);
@@ -26,16 +27,52 @@ export const TopBar: React.FC<TopBarProps> = ({ isCollapsed, onOpenMobileMenu })
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState<{ id: string; title: string; type: 'ticket' | 'page'; path: string; ticketNumber?: string }[]>([]);
+  const [showSearchResults, setShowSearchResults] = useState(false);
+  const searchRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
         setShowNotifications(false);
       }
+      if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
+        setShowSearchResults(false);
+      }
     };
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
+
+  const { tickets } = useTickets();
+
+  useEffect(() => {
+    if (!searchQuery.trim()) {
+      setSearchResults([]);
+      return;
+    }
+
+    const query = searchQuery.toLowerCase();
+    
+    // Search in tickets
+    const matchedTickets = (tickets as Ticket[])
+      .filter(t => 
+        t.title.toLowerCase().includes(query) || 
+        (t.ticketNumber && String(t.ticketNumber).toLowerCase().includes(query)) ||
+        t.id.toLowerCase().includes(query)
+      )
+      .slice(0, 5)
+      .map(t => ({
+        id: t.id,
+        title: t.title,
+        type: 'ticket' as const,
+        path: `/${user?.role.toLowerCase()}/tickets/${t.id}`,
+        ticketNumber: t.ticketNumber ? `TKT-${String(t.ticketNumber).padStart(5, '0')}` : undefined
+      }));
+
+    setSearchResults(matchedTickets);
+  }, [searchQuery, tickets, user?.role]);
 
   if (!user) return null;
 
@@ -73,6 +110,12 @@ export const TopBar: React.FC<TopBarProps> = ({ isCollapsed, onOpenMobileMenu })
     }
   };
 
+  const handleSearchResultClick = (path: string) => {
+    navigate(path);
+    setSearchQuery('');
+    setShowSearchResults(false);
+  };
+
   return (
     <header className={clsx(
       "fixed top-0 right-0 h-[70px] glass-panel border-b border-white/5 z-30 flex items-center justify-between px-4 md:px-8 transition-all duration-300",
@@ -87,14 +130,47 @@ export const TopBar: React.FC<TopBarProps> = ({ isCollapsed, onOpenMobileMenu })
           <Menu size={20} />
         </button>
         
-        <div className="hidden sm:block flex-1 max-w-md min-w-[200px]">
+        <div className="hidden sm:block flex-1 max-w-md min-w-[200px]" ref={searchRef}>
           <div className="relative group">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4 group-focus-within:text-violet-400 transition-colors" />
             <input 
               type="text" 
               placeholder="Search..." 
+              value={searchQuery}
+              onChange={(e) => {
+                setSearchQuery(e.target.value);
+                setShowSearchResults(true);
+              }}
+              onFocus={() => setShowSearchResults(true)}
               className="w-full bg-[var(--input-bg)] border border-white/10 rounded-full py-2 pl-10 pr-4 text-sm text-[var(--text-primary)] placeholder-slate-500 focus:outline-none focus:border-violet-500/50 focus:ring-1 focus:ring-violet-500/50 transition-all"
             />
+
+            {/* Search Results Dropdown */}
+            {showSearchResults && searchResults.length > 0 && (
+              <div className="absolute top-[calc(100%+8px)] left-0 w-full glass-panel border border-white/10 rounded-xl overflow-hidden shadow-2xl animate-fade-in origin-top">
+                <div className="p-2 divide-y divide-white/5">
+                  {searchResults.map((result) => (
+                    <button
+                      key={result.id}
+                      onClick={() => handleSearchResultClick(result.path)}
+                      className="w-full text-left p-3 hover:bg-white/[0.05] transition-colors flex items-center gap-3 group rounded-lg"
+                    >
+                      <div className="p-2 rounded-lg bg-white/5 text-slate-400 group-hover:text-violet-400 group-hover:bg-violet-400/10 transition-colors">
+                        <TicketIcon size={16} />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="text-xs font-bold text-violet-400 font-mono mb-0.5">
+                          {result.ticketNumber || `#${result.id.slice(0, 8)}`}
+                        </div>
+                        <div className="text-sm font-medium text-[var(--text-primary)] truncate">
+                          {result.title}
+                        </div>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>
