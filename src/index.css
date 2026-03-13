@@ -33,18 +33,18 @@
 }
 
 .light {
-  --bg-base: #f1f5f9;
+  --bg-base: #f8fafc;
   --bg-surface: #ffffff;
-  --bg-card: rgba(255, 255, 255, 0.9);
-  --bg-card-hover: #ffffff;
-  --text-primary: #020617; /* Much darker for readability */
-  --text-secondary: #334155;
-  --text-muted: #64748b;
-  --border-glow: 1px solid rgba(139, 92, 246, 0.3); /* Stronger borders */
-  --border-glow-active: 1px solid rgba(139, 92, 246, 0.6);
-  --panel-bg: rgba(255, 255, 255, 0.95);
-  --input-bg: #ffffff;
-  --accent-glow: 0 4px 12px rgba(139, 92, 246, 0.15);
+  --bg-card: #ffffff;
+  --bg-card-hover: #f1f5f9;
+  --text-primary: #000000; /* Pure Black for Maximum Readability */
+  --text-secondary: #0f172a; /* Very Dark Navy */
+  --text-muted: #334155; /* Solid Gray */
+  --border-glow: 1px solid #e2e8f0; /* Clear solid border */
+  --border-glow-active: 1px solid #cbd5e1;
+  --panel-bg: #ffffff;
+  --input-bg: #f8fafc;
+  --accent-glow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
 }
 
 * {
@@ -116,7 +116,8 @@ body {
 }
 
 .light .glass-panel {
-  border: 1px solid rgba(0, 0, 0, 0.05);
+  border: 1px solid #cbd5e1; /* Much more visible border in light mode */
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05);
 }
 
 /* Form Elements */
@@ -133,7 +134,8 @@ body {
 }
 
 .light .input-field {
-  border-color: rgba(0, 0, 0, 0.1);
+  border: 1px solid #94a3b8; /* Darker border for inputs */
+  background: #ffffff;
 }
 
 .input-field:focus {
