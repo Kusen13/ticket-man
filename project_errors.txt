@@ -1,1 +1,0 @@
-src/context/AuthProvider.tsx(5,1): error TS6133: 'mockUsers' is declared but its value is never read.

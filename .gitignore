@@ -26,3 +26,6 @@ Thumbs.db
 
 # Vite
 vite.config.ts.timestamp*
+
+# Debug / temporary output files
+*.txt
