@@ -22,7 +22,7 @@ const STATUS_OPTIONS: TicketStatus[] = ['OPEN', 'IN_PROGRESS', 'RESOLVED', 'CLOS
 
 export const AdminTickets: React.FC = () => {
   const { id } = useParams();
-  const { tickets, assignTicket, deleteTicket } = useTickets();
+  const { tickets, assignTicket, deleteTicket, updateTicketStatus } = useTickets();
   const { user } = useAuth();
   const { users, departments } = useData();
   const navigate = useNavigate();
@@ -216,8 +216,23 @@ export const AdminTickets: React.FC = () => {
                       <td className="p-4 text-center">
                         <PriorityBadge priority={ticket.priority} />
                       </td>
-                      <td className="p-4 text-center">
-                        <StatusBadge status={ticket.status} />
+                      <td className="p-4">
+                        <div className="relative inline-block">
+                          <StatusBadge status={ticket.status} />
+                          <select
+                            value={ticket.status}
+                            onClick={e => e.stopPropagation()}
+                            onChange={e => {
+                              e.stopPropagation();
+                              updateTicketStatus(ticket.id, e.target.value as TicketStatus);
+                            }}
+                            className="absolute inset-0 opacity-0 cursor-pointer w-full"
+                          >
+                            {STATUS_OPTIONS.map(s => (
+                              <option key={s} value={s} className="bg-slate-900">{s.replace('_', ' ')}</option>
+                            ))}
+                          </select>
+                        </div>
                       </td>
                       <td className="p-4">
                         <Countdown deadline={ticket.deadline} status={ticket.status} />
