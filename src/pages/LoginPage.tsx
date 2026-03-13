@@ -106,12 +106,6 @@ export const LoginPage: React.FC = () => {
     }
   };
 
-  const handleDemoClick = (demoEmail: string) => {
-    setIsSignup(false);
-    setEmail(demoEmail);
-    setPassword('Demo@123'); // Demo passwords are now active for email logins
-  };
-
   return (
     <div className="min-h-screen bg-[#06060b] flex items-center justify-center p-4 relative overflow-hidden">
       {/* Background Glows */}
@@ -256,40 +250,6 @@ export const LoginPage: React.FC = () => {
                     Microsoft
                 </button>
               </div>
-          </div>
-
-          {/* Demo Credentials (Keep for preview environments but note restrictions) */}
-          <div className="mt-6 pt-4 border-t border-white/5">
-            <p className="text-[10px] text-center text-slate-500 mb-3">Pre-filled Demo Login</p>
-            <div className="grid grid-cols-3 gap-2">
-              <button 
-                type="button"
-                onClick={() => handleDemoClick('senkudelacruz13@gmail.com')} 
-                className="px-2 py-1.5 rounded-md bg-white/5 border border-white/10 text-xs text-slate-300 hover:bg-white/10 transition-colors"
-                title="Senku (Employee)"
-              >
-                  Employee
-              </button>
-              <button 
-                type="button"
-                onClick={() => handleDemoClick('lindseyatok@gmail.com')} 
-                className="px-2 py-1.5 rounded-md bg-white/5 border border-white/10 text-xs text-slate-300 hover:bg-white/10 transition-colors"
-                title="Lindsey Atok (Admin)"
-              >
-                  Admin
-               </button>
-              <button 
-                type="button"
-                onClick={() => handleDemoClick('angelodelacruz1315@gmail.com')} 
-                className="px-2 py-1.5 rounded-md bg-white/5 border border-white/10 text-xs text-slate-300 hover:bg-white/10 transition-colors"
-                title="Angelo (Super Admin)"
-              >
-                  Super Admin
-              </button>
-            </div>
-            <p className="text-[9px] text-slate-500/70 text-center mt-3 leading-tight">
-                Note: Mock users must be registered in the new Auth system to work.
-            </p>
           </div>
 
         </div>
