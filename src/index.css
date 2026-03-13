@@ -33,18 +33,18 @@
 }
 
 .light {
-  --bg-base: #ffffff; /* Pure White */
-  --bg-surface: #ffffff; /* Pure White */
-  --bg-card: #ffffff; /* Pure White */
-  --bg-card-hover: #ffffff; /* Pure White */
-  --text-primary: #000000;
-  --text-secondary: #000000;
-  --text-muted: #000000; /* Force all hints to black */
-  --border-glow: 1px solid #000000;
-  --border-glow-active: 2px solid #000000;
-  --panel-bg: #ffffff; /* Pure White */
-  --input-bg: #ffffff; /* Pure White */
-  --accent-glow: 0 2px 4px 0 rgba(0, 0, 0, 0.1);
+  --bg-base: #f2eeeb; /* Warm Semi-White from Reference */
+  --bg-surface: #e8e4e1;
+  --bg-card: #f9f7f6;
+  --bg-card-hover: #ffffff;
+  --text-primary: #1a1a1c; /* Deep Charcoal/Black */
+  --text-secondary: #4a4a4d;
+  --text-muted: #6e6e73;
+  --border-glow: 1px solid rgba(0, 0, 0, 0.08); /* Subtle and elegant */
+  --border-glow-active: 1px solid rgba(124, 58, 237, 0.3);
+  --panel-bg: #f2eeeb;
+  --input-bg: #ffffff;
+  --accent-glow: 0 10px 30px -10px rgba(0, 0, 0, 0.1);
 }
 
 * {
@@ -71,56 +71,50 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
+
+/* Global Light Mode Overrides */
 .light body {
-  background-image: none !important; /* Remove all gray mesh/grids */
-  background-color: #ffffff !important;
+  background-image: none !important;
+  background-color: var(--bg-base) !important;
 }
 
-/* Global Light Mode Force - Overrides all Slates and Grays */
 .light,
-.light body,
-.light .bg-slate-50,
-.light .bg-slate-100,
-.light .bg-slate-200,
-.light .bg-slate-800\/50,
-.light .bg-slate-900\/50,
-.light .bg-gray-50,
-.light .bg-gray-100,
-.light .bg-white\/5,
-.light .bg-white\/10 {
-  background-color: #ffffff !important;
-}
-
-/* Force All Fonts to Black in Light Mode */
-.light,
-.light body,
 .light .text-white,
 .light .text-slate-50,
 .light .text-slate-100,
 .light .text-slate-200,
 .light .text-slate-300,
 .light .text-slate-400,
-.light [class*="text-slate-"],
-.light [class*="text-gray-"],
-.light [class*="text-white"] {
+.light .text-slate-500 {
   color: #000000 !important;
 }
 
-/* Force All Outlines/Borders to Black in Light Mode */
+/* Force Table and Card Headers to Black */
+.light th,
+.light td,
+.light h1, .light h2, .light h3, .light h4 {
+  color: #000000 !important;
+}
+
+/* Black Outlines for Semi-White Background */
 .light .glass-card,
 .light .glass-panel,
 .light .input-field,
-.light [class*="border-white"],
-.light [class*="border-slate-"],
-.light [class*="border-gray-"] {
+.light .border-white\/5,
+.light .border-white\/10 {
   border-color: #000000 !important;
-  border-opacity: 1 !important;
+  background-color: #ffffff !important;
 }
 
-/* Ensure icons and other elements also switch to black if they were light */
-.light .lucide,
-.light svg {
-  color: inherit;
+.light .bg-slate-800\/50,
+.light .bg-slate-900\/50 {
+  background-color: #1a1a1c !important; /* Dark contrast components */
+  color: #ffffff !important;
+}
+
+.light .bg-slate-800\/50 *,
+.light .bg-slate-900\/50 * {
+  color: #ffffff !important;
 }
 
 /* Scrollbar */
@@ -163,8 +157,8 @@ body {
 }
 
 .light .glass-panel {
-  border: 1px solid #000000; /* Bold black borders */
-  box-shadow: none;
+  border: 1px solid #000000;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
 }
 
 /* Form Elements */
