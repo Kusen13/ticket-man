@@ -128,7 +128,7 @@ export const SuperAdminDashboard: React.FC = () => {
       </div>
 
       {/* Filter Bar */}
-      <div className="glass-card p-5 no-print border-violet-500/10">
+      <div className="glass-card p-5 no-print border-violet-500/10 overflow-hidden w-full max-w-full">
         <div className="flex flex-col lg:flex-row lg:items-center gap-8">
           <div className="flex items-center gap-3 shrink-0">
             <div className="w-9 h-9 rounded-xl bg-violet-500/10 flex items-center justify-center text-violet-400">
@@ -159,7 +159,7 @@ export const SuperAdminDashboard: React.FC = () => {
             </div>
 
             {/* Start Date */}
-            <div className="space-y-1.5">
+            <div className="space-y-1.5 w-full min-w-0 max-w-full">
               <label className="text-[10px] font-bold text-slate-500 uppercase flex items-center gap-1.5">
                 <Calendar size={12} /> Start Period
               </label>
@@ -167,12 +167,12 @@ export const SuperAdminDashboard: React.FC = () => {
                 type="date" 
                 value={startDate}
                 onChange={(e) => setStartDate(e.target.value)}
-                className="w-full bg-slate-900/50 border border-white/10 rounded-lg py-2 px-3 text-sm text-white focus:outline-none focus:border-violet-500/50"
+                className="w-full bg-slate-900/50 border border-white/10 rounded-lg py-2 px-2 sm:px-3 text-sm text-white focus:outline-none focus:border-violet-500/50 min-w-0 appearance-none max-w-full"
               />
             </div>
 
             {/* End Date */}
-            <div className="space-y-1.5">
+            <div className="space-y-1.5 w-full min-w-0 max-w-full">
               <label className="text-[10px] font-bold text-slate-500 uppercase flex items-center gap-1.5">
                 <Calendar size={12} /> End Period
               </label>
@@ -180,7 +180,7 @@ export const SuperAdminDashboard: React.FC = () => {
                 type="date" 
                 value={endDate}
                 onChange={(e) => setEndDate(e.target.value)}
-                className="w-full bg-slate-900/50 border border-white/10 rounded-lg py-2 px-3 text-sm text-white focus:outline-none focus:border-violet-500/50"
+                className="w-full bg-slate-900/50 border border-white/10 rounded-lg py-2 px-2 sm:px-3 text-sm text-white focus:outline-none focus:border-violet-500/50 min-w-0 appearance-none max-w-full"
               />
             </div>
           </div>
