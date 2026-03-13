@@ -224,7 +224,7 @@ export const UserManagement: React.FC = () => {
 
         {/* Table */}
         <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
+          <table className="w-full text-left border-collapse min-w-[900px]">
             <thead>
               <tr className="bg-white/[0.02] border-b border-white/5 text-xs font-semibold text-slate-400 uppercase tracking-wider">
                 <th className="p-4 pl-6 font-medium">User Profile</th>
