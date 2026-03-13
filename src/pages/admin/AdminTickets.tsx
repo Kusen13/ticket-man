@@ -238,36 +238,11 @@ export const AdminTickets: React.FC = () => {
                         <Countdown deadline={ticket.deadline} status={ticket.status} />
                       </td>
                       <td className="p-4">
-                        <div className="relative inline-block w-[140px]">
-                          {ticket.assignedTo ? (
-                            <button
-                              onClick={(e) => { e.stopPropagation(); setAssigningTicketId(ticket.id); }}
-                              className="w-full flex items-center justify-between gap-2 px-3 py-1.5 bg-slate-900 border border-slate-700 hover:border-violet-500 rounded-lg text-xs text-slate-300 transition-colors"
-                            >
-                              <div className="flex items-center gap-2 truncate">
-                                <img src={users.find(u => u.id === ticket.assignedTo)?.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(users.find(u => u.id === ticket.assignedTo)?.name || 'U')}&background=8b5cf6&color=fff`} className="w-5 h-5 rounded-full shrink-0" alt="" />
-                                <span className="truncate">{users.find(u => u.id === ticket.assignedTo)?.name}</span>
-                              </div>
-                              <ChevronDown size={14} className="text-slate-500 shrink-0" />
-                            </button>
-                          ) : (
-                            <button
-                              onClick={(e) => { e.stopPropagation(); setAssigningTicketId(ticket.id); }}
-                              className="w-full flex items-center justify-between gap-2 px-3 py-1.5 bg-violet-500/10 border border-violet-500/30 hover:border-violet-500 rounded-lg text-xs text-violet-400 transition-colors"
-                            >
-                              <div className="flex items-center gap-2">
-                                <UserCheck size={14} />
-                                <span>Assign</span>
-                              </div>
-                              <ChevronDown size={14} className="text-violet-500 shrink-0" />
-                            </button>
-                          )}
-                          
-                          {assigningTicketId === ticket.id && (
-                            <select
-                              value=""
-                              onClick={(e) => e.stopPropagation()}
-                              onChange={(e) => {
+                        {assigningTicketId === ticket.id ? (
+                          <select
+                            value=""
+                            onClick={(e) => e.stopPropagation()}
+                            onChange={e => {
                                 e.stopPropagation();
                                 const val = e.target.value;
                                 if (!val) {
@@ -277,23 +252,52 @@ export const AdminTickets: React.FC = () => {
                                 const selectedUserId = val === 'unassign' ? '' : val;
                                 const uName = selectedUserId ? users.find(u => u.id === selectedUserId)?.name || 'Unknown' : 'Unassigned';
                                 setConfirmAssignData({ ticketId: ticket.id, userId: selectedUserId, userName: uName });
-                              }}
-                              autoFocus
-                              onBlur={(e) => {
+                            }}
+                            autoFocus
+                            onBlur={(e) => {
                                 if (!e.relatedTarget) setTimeout(() => setAssigningTicketId(null), 200);
-                              }}
-                              className="absolute inset-0 opacity-0 cursor-pointer w-full z-10"
-                            >
-                              <option value="">Select Resolver...</option>
-                              <option value="unassign">Unassigned</option>
-                              {users.filter(u => u.departmentId === ticket.departmentId && (u.role === 'EMPLOYEE' || u.role === 'ADMIN')).filter(r => r.id !== ticket.createdBy).map(r => (
-                                <option key={r.id} value={r.id}>
-                                  {r.name} {r.id === ticket.assignedTo ? '(Current)' : ''}
-                                </option>
-                              ))}
-                            </select>
-                          )}
-                        </div>
+                            }}
+                            className="appearance-none bg-slate-900 border border-violet-500/40 rounded-lg py-1.5 pl-2 pr-7 text-sm text-white focus:outline-none focus:border-violet-500"
+                          >
+                            <option value="">Select Resolver...</option>
+                            <option value="unassign">Unassigned</option>
+                            {users.filter(u => u.departmentId === ticket.departmentId && (u.role === 'EMPLOYEE' || u.role === 'ADMIN')).filter(r => r.id !== ticket.createdBy).map(r => (
+                              <option key={r.id} value={r.id}>
+                                {r.name} {r.id === ticket.assignedTo ? '(Current)' : ''}
+                              </option>
+                            ))}
+                          </select>
+                        ) : (
+                          <button
+                            onClick={(e) => { e.stopPropagation(); setAssigningTicketId(ticket.id); }}
+                            className="flex items-center gap-2 text-xs text-slate-400 hover:text-violet-300 transition-colors group/assign"
+                            title={ticket.status === 'REOPENED' ? "Click to re-assign" : "Click to assign"}
+                          >
+                            {ticket.assignedTo ? (
+                              <>
+                                <img
+                                  src={users.find(u => u.id === ticket.assignedTo)?.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(users.find(u => u.id === ticket.assignedTo)?.name || 'U')}&background=8b5cf6&color=fff`}
+                                  alt={users.find(u => u.id === ticket.assignedTo)?.name || 'U'}
+                                  className="w-6 h-6 rounded-full border border-white/10"
+                                />
+                                <div className="flex flex-col items-start">
+                                  {ticket.status === 'REOPENED' && <span className="text-[9px] text-orange-400 font-bold uppercase tracking-tighter">Previous Assignee</span>}
+                                  <span className="text-slate-300 group-hover/assign:text-violet-300">{users.find(u => u.id === ticket.assignedTo)?.name}</span>
+                                  {ticket.status === 'REOPENED' && <span className="text-[10px] text-violet-400 underline font-semibold">Re-Assign →</span>}
+                                </div>
+                              </>
+                            ) : (
+                              <>
+                                <div className="w-6 h-6 rounded-full border border-dashed border-slate-600 flex items-center justify-center">
+                                  <UserCheck size={12} className="text-slate-600 group-hover/assign:text-violet-400" />
+                                </div>
+                                <span className="text-slate-600 group-hover/assign:text-violet-400">
+                                  {ticket.status === 'REOPENED' ? 'Re-Assign' : 'Assign'}
+                                </span>
+                              </>
+                            )}
+                          </button>
+                        )}
                       </td>
                       <td className="p-4 text-xs text-slate-400">
                         {dayjs(ticket.createdAt).format('MM/DD HH:mm')}
