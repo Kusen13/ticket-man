@@ -3,39 +3,48 @@
 @tailwind utilities;
 
 :root {
-  /* Background Variables */
+  /* Dark Theme (Default) */
   --bg-base: #06060b;
   --bg-surface: #0e0e18;
   --bg-card: rgba(18, 18, 30, 0.6);
   --bg-card-hover: rgba(25, 25, 40, 0.7);
+  --text-primary: #f1f5f9;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+  --border-glow: 1px solid rgba(139, 92, 246, 0.15);
+  --border-glow-active: 1px solid rgba(139, 92, 246, 0.4);
+  --panel-bg: rgba(10, 10, 15, 0.8);
+  --input-bg: rgba(255, 255, 255, 0.05);
 
-  /* Accent & Glow */
+  /* Accent & Status (Shared mostly) */
   --accent-primary: #8b5cf6;
   --accent-secondary: #a78bfa;
   --accent-glow: 0 0 20px rgba(139, 92, 246, 0.3);
   --accent-glow-strong: 0 0 30px rgba(139, 92, 246, 0.5);
-  --border-glow: 1px solid rgba(139, 92, 246, 0.15);
-  --border-glow-active: 1px solid rgba(139, 92, 246, 0.4);
-  
-  /* Text */
-  --text-primary: #f1f5f9;
-  --text-secondary: #94a3b8;
-  --text-muted: #64748b;
-
-  /* Status Colors */
   --status-open: #22d3ee;
   --status-in-progress: #a78bfa;
   --status-resolved: #34d399;
   --status-urgent: #f43f5e;
-
-  /* Common */
   --radius-card: 12px;
   --radius-btn: 8px;
   --font-family: 'Inter', system-ui, sans-serif;
-  
-  /* Navbar / Sidebar Width */
   --sidebar-width: 260px;
   --header-height: 70px;
+}
+
+.light {
+  --bg-base: #f8fafc;
+  --bg-surface: #ffffff;
+  --bg-card: rgba(255, 255, 255, 0.8);
+  --bg-card-hover: rgba(255, 255, 255, 1);
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-muted: #64748b;
+  --border-glow: 1px solid rgba(139, 92, 246, 0.2);
+  --border-glow-active: 1px solid rgba(139, 92, 246, 0.5);
+  --panel-bg: rgba(255, 255, 255, 0.9);
+  --input-bg: rgba(0, 0, 0, 0.03);
+  --accent-glow: 0 4px 12px rgba(139, 92, 246, 0.1);
 }
 
 * {
@@ -52,11 +61,19 @@ body {
   /* Subtle mesh/grid gradient background */
   background-image: radial-gradient(circle at top right, rgba(139, 92, 246, 0.05) 0%, transparent 40%),
                     radial-gradient(circle at bottom left, rgba(139, 92, 246, 0.05) 0%, transparent 40%),
-                    linear-gradient(to right, rgba(255, 255, 255, 0.01) 1px, transparent 1px),
-                    linear-gradient(to bottom, rgba(255, 255, 255, 0.01) 1px, transparent 1px);
+                    linear-gradient(to right, currentColor 0.02, transparent 1px),
+                    linear-gradient(to bottom, currentColor 0.02, transparent 1px);
   background-size: 100% 100%, 100% 100%, 40px 40px, 40px 40px;
+  background-attachment: fixed;
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
+}
+
+.light body {
+  background-image: radial-gradient(circle at top right, rgba(139, 92, 246, 0.08) 0%, transparent 40%),
+                    radial-gradient(circle at bottom left, rgba(139, 92, 246, 0.08) 0%, transparent 40%),
+                    linear-gradient(to right, rgba(0, 0, 0, 0.05) 1px, transparent 1px),
+                    linear-gradient(to bottom, rgba(0, 0, 0, 0.05) 1px, transparent 1px);
 }
 
 /* Scrollbar */
@@ -93,15 +110,19 @@ body {
 }
 
 .glass-panel {
-  background: rgba(10, 10, 15, 0.8);
+  background: var(--panel-bg);
   backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.light .glass-panel {
+  border: 1px solid rgba(0, 0, 0, 0.05);
 }
 
 /* Form Elements */
 .input-field {
   width: 100%;
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--input-bg);
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: var(--radius-btn);
   padding: 0.75rem 1rem;
@@ -111,8 +132,12 @@ body {
   outline: none;
 }
 
+.light .input-field {
+  border-color: rgba(0, 0, 0, 0.1);
+}
+
 .input-field:focus {
-  background: rgba(255, 255, 255, 0.08);
+  background: var(--input-bg);
   border-color: var(--accent-primary);
   box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.2);
 }

@@ -2,14 +2,14 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useAuth } from '../../hooks/useAuth';
 import { useData } from '../../hooks/useData';
 import { useNavigate } from 'react-router-dom';
-import { Bell, Search, CheckCircle2, AlertCircle, MessageSquare, Info, Menu, RefreshCw } from 'lucide-react';
+import { Bell, Search, CheckCircle2, AlertCircle, MessageSquare, Info, Menu, RefreshCw, Sun, Moon } from 'lucide-react';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
 import { useTickets } from '../../hooks/useTickets';
+import { useTheme } from '../../context/ThemeContext';
+import clsx from 'clsx';
 
 dayjs.extend(relativeTime);
-
-import clsx from 'clsx';
 
 interface TopBarProps {
   isCollapsed: boolean;
@@ -20,6 +20,7 @@ export const TopBar: React.FC<TopBarProps> = ({ isCollapsed, onOpenMobileMenu })
   const { user } = useAuth();
   const { notifications, markNotificationRead, markAllNotificationsRead, refreshData } = useData();
   const { refreshTickets } = useTickets();
+  const { theme, toggleTheme } = useTheme();
   const navigate = useNavigate();
   
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -42,7 +43,7 @@ export const TopBar: React.FC<TopBarProps> = ({ isCollapsed, onOpenMobileMenu })
   const unreadNotifications = userNotifications.filter(n => !n.isRead).sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
   const unreadCount = unreadNotifications.length;
 
-  const handleNotificationClick = (notif: typeof notifications[0]) => {
+  const handleNotificationClick = (notif: any) => {
     if (!notif.isRead) markNotificationRead(notif.id);
     setShowNotifications(false);
     if (notif.link) {
@@ -59,7 +60,6 @@ export const TopBar: React.FC<TopBarProps> = ({ isCollapsed, onOpenMobileMenu })
         refreshTickets()
       ]);
     } finally {
-      // Small delay for visual feedback
       setTimeout(() => setIsRefreshing(false), 800);
     }
   };
@@ -82,25 +82,23 @@ export const TopBar: React.FC<TopBarProps> = ({ isCollapsed, onOpenMobileMenu })
       <div className="flex items-center gap-3">
         <button 
           onClick={onOpenMobileMenu}
-          className="lg:hidden p-2 text-slate-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors"
+          className="lg:hidden p-2 text-slate-400 hover:text-[var(--text-primary)] hover:bg-white/5 rounded-lg transition-colors"
         >
           <Menu size={20} />
         </button>
         
-        {/* Search */}
         <div className="hidden sm:block flex-1 max-w-md min-w-[200px]">
           <div className="relative group">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4 group-focus-within:text-violet-400 transition-colors" />
             <input 
               type="text" 
               placeholder="Search..." 
-              className="w-full bg-slate-900/50 border border-white/10 rounded-full py-2 pl-10 pr-4 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-violet-500/50 focus:ring-1 focus:ring-violet-500/50 transition-all"
+              className="w-full bg-[var(--input-bg)] border border-white/10 rounded-full py-2 pl-10 pr-4 text-sm text-[var(--text-primary)] placeholder-slate-500 focus:outline-none focus:border-violet-500/50 focus:ring-1 focus:ring-violet-500/50 transition-all"
             />
           </div>
         </div>
       </div>
 
-      {/* Right Actions */}
       <div className="flex items-center gap-4 relative" ref={dropdownRef}>
         <button 
           onClick={handleSync}
@@ -111,9 +109,17 @@ export const TopBar: React.FC<TopBarProps> = ({ isCollapsed, onOpenMobileMenu })
           <RefreshCw size={18} />
         </button>
 
+        <button
+          onClick={toggleTheme}
+          className="p-2 text-slate-400 hover:text-amber-400 hover:bg-amber-400/10 rounded-full transition-all"
+          title={theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+        >
+          {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
+        </button>
+
         <button 
           onClick={() => setShowNotifications(!showNotifications)}
-          className={`relative p-2 transition-colors rounded-full ${showNotifications ? 'bg-white/10 text-white' : 'text-slate-400 hover:text-white hover:bg-white/5'}`}
+          className={`relative p-2 transition-colors rounded-full ${showNotifications ? 'bg-white/10 text-[var(--text-primary)]' : 'text-slate-400 hover:text-[var(--text-primary)] hover:bg-white/5'}`}
         >
           <Bell size={20} />
           {unreadCount > 0 && (
@@ -121,11 +127,10 @@ export const TopBar: React.FC<TopBarProps> = ({ isCollapsed, onOpenMobileMenu })
           )}
         </button>
 
-        {/* Notifications Dropdown */}
         {showNotifications && (
           <div className="absolute top-[calc(100%+8px)] right-0 w-80 glass-panel border border-white/10 rounded-xl overflow-hidden shadow-2xl animate-fade-in origin-top-right">
             <div className="p-4 border-b border-white/5 flex items-center justify-between bg-white/[0.02]">
-              <h3 className="font-semibold text-white">Notifications</h3>
+              <h3 className="font-semibold text-[var(--text-primary)]">Notifications</h3>
               {unreadCount > 0 && (
                 <button 
                   onClick={() => markAllNotificationsRead(user.id)}
@@ -154,7 +159,7 @@ export const TopBar: React.FC<TopBarProps> = ({ isCollapsed, onOpenMobileMenu })
                         {getIcon(notif.type)}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <div className="text-sm font-semibold text-white truncate">
+                        <div className="text-sm font-semibold text-[var(--text-primary)] truncate">
                           {notif.title}
                         </div>
                         <div className="text-xs text-slate-400 mt-1 line-clamp-2">
@@ -177,7 +182,7 @@ export const TopBar: React.FC<TopBarProps> = ({ isCollapsed, onOpenMobileMenu })
                   setShowNotifications(false);
                   navigate(`/${user.role.toLowerCase()}/notifications`);
                 }}
-                className="text-xs font-medium text-slate-300 hover:text-white transition-colors"
+                className="text-xs font-medium text-slate-300 hover:text-[var(--text-primary)] transition-colors"
               >
                 View all notifications
               </button>

@@ -111,7 +111,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           </div>
           {(!isCollapsed || isMobileOpen) && (
             <div className="flex flex-col animate-fade-in">
-              <span className="font-black text-lg tracking-tight text-white leading-none">TICKET MAN</span>
+              <span className="font-black text-lg tracking-tight text-[var(--text-primary)] leading-none">TICKET MAN</span>
               <span className="text-[10px] text-violet-400 font-bold uppercase tracking-widest mt-0.5">Control Center</span>
             </div>
           )}
@@ -152,7 +152,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 "flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-200 group text-sm font-semibold relative mb-1",
                 isActive 
                   ? "bg-gradient-to-r from-violet-600/20 to-transparent text-violet-400 shadow-[inset_1px_0_0_rgba(139,92,246,0.5)]" 
-                  : "text-slate-400 hover:text-slate-200 hover:bg-white/[0.03]",
+                  : "text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-white/[0.03]",
                 (isCollapsed && !isMobileOpen) && "justify-center px-0 h-11 w-11 mx-auto"
               )}
               title={(isCollapsed && !isMobileOpen) ? item.name : ''}
@@ -186,7 +186,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           </div>
           {(!isCollapsed || isMobileOpen) && (
             <div className="flex-1 min-w-0 animate-fade-in">
-              <p className="text-xs font-bold text-white truncate leading-tight uppercase tracking-tight">{user.name}</p>
+              <p className="text-xs font-bold text-[var(--text-primary)] truncate leading-tight uppercase tracking-tight">{user.name}</p>
               <p className="text-[10px] text-slate-500 truncate font-semibold mt-0.5">{user.role.replace('_', ' ')}</p>
             </div>
           )}
