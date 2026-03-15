@@ -1,0 +1,57 @@
+/// <reference lib="webworker" />
+declare const self: ServiceWorkerGlobalScope;
+
+// Allow typescript to recognize the global workbox variables if needed
+// though we are writing a plain service worker for push.
+
+self.addEventListener('push', (event) => {
+  if (!event.data) return;
+
+  try {
+    const data = event.data.json();
+    console.log('Push received:', data);
+
+    const title = data.title || 'New Notification';
+    const options: NotificationOptions = {
+      body: data.body || 'You have a new message.',
+      icon: 'https://ui-avatars.com/api/?name=TM&background=8b5cf6&color=fff&size=192',
+      badge: 'https://ui-avatars.com/api/?name=TM&background=8b5cf6&color=fff&size=128', // small monochromatic icon for Android status bar
+      data: {
+        url: data.url || '/',
+      },
+      vibrate: [200, 100, 200],
+    };
+
+    event.waitUntil(self.registration.showNotification(title, options));
+  } catch (error) {
+    console.error('Error parsing push payload', error);
+    // Fallback if payload isn't JSON
+    event.waitUntil(
+      self.registration.showNotification('Ticket Man', {
+        body: event.data.text(),
+        icon: 'https://ui-avatars.com/api/?name=TM&background=8b5cf6&color=fff&size=192',
+      })
+    );
+  }
+});
+
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+
+  const urlToOpen = event.notification.data?.url || '/';
+
+  event.waitUntil(
+    self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
+      // If a window tab matching the targeted URL is already open, focus that;
+      for (const client of clientList) {
+        if (client.url.includes(urlToOpen) && 'focus' in client) {
+          return client.focus();
+        }
+      }
+      // If none found, or no focus available, open a new window
+      if (self.clients.openWindow) {
+        return self.clients.openWindow(urlToOpen);
+      }
+    })
+  );
+});

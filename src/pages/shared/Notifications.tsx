@@ -1,7 +1,8 @@
 import React, { useMemo } from 'react';
 import { useData } from '../../hooks/useData';
 import { useAuth } from '../../hooks/useAuth';
-import { Bell, Trash2, CheckCircle2, MessageSquare, AlertCircle, Info, Link as LinkIcon } from 'lucide-react';
+import { usePushNotifications } from '../../hooks/usePushNotifications';
+import { Bell, Trash2, CheckCircle2, MessageSquare, AlertCircle, Info, Link as LinkIcon, Smartphone } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
@@ -11,6 +12,7 @@ dayjs.extend(relativeTime);
 export const Notifications: React.FC = () => {
   const { user } = useAuth();
   const { notifications, deleteNotification, clearAllNotifications, markNotificationRead } = useData();
+  const { isSupported, isSubscribed, isLoading, subscribe } = usePushNotifications();
   const navigate = useNavigate();
 
   const userNotifications = useMemo(() => {
@@ -73,6 +75,28 @@ export const Notifications: React.FC = () => {
           </button>
         )}
       </div>
+
+      {isSupported && !isSubscribed && !isLoading && (
+        <div className="glass-card border border-violet-500/20 bg-violet-500/5 p-4 sm:p-6 rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="flex flex-col sm:flex-row items-center gap-4 text-center sm:text-left">
+            <div className="w-10 h-10 rounded-xl bg-violet-500/10 flex items-center justify-center shrink-0">
+              <Smartphone className="text-violet-400" size={20} />
+            </div>
+            <div>
+              <h3 className="text-sm font-bold text-white uppercase tracking-wider mb-1">Stay Updated Anywhere</h3>
+              <p className="text-xs text-slate-400 max-w-sm">
+                Enable mobile-friendly push notifications to get alerts even when the app is closed.
+              </p>
+            </div>
+          </div>
+          <button 
+            onClick={subscribe}
+            className="btn-primary py-2.5 px-6 shrink-0 shadow-[0_0_20px_rgba(139,92,246,0.2)] whitespace-nowrap"
+          >
+            Enable Notifications
+          </button>
+        </div>
+      )}
 
       <div className="glass-card overflow-hidden border-white/5">
         {userNotifications.length === 0 ? (
