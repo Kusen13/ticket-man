@@ -22,7 +22,6 @@ import { SuperAdminTickets } from './pages/super_admin/SuperAdminTickets';
 import { UserManagement } from './pages/super_admin/UserManagement';
 import { DepartmentsManagement } from './pages/super_admin/DepartmentsManagement';
 import { SystemSettings } from './pages/super_admin/SystemSettings';
-import { KnowledgeBaseManagement } from './pages/super_admin/KnowledgeBaseManagement';
 
 import { KnowledgeBase } from './pages/shared/KnowledgeBase';
 import { Messages } from './pages/shared/Messages';
@@ -108,7 +107,6 @@ function App() {
                   <Route path="/super_admin/tickets/:id" element={<SuperAdminTickets />} />
                   <Route path="/super_admin/users" element={<UserManagement />} />
                   <Route path="/super_admin/departments" element={<DepartmentsManagement />} />
-                  <Route path="/super_admin/kb" element={<KnowledgeBaseManagement />} />
                   <Route path="/super_admin/settings" element={<SystemSettings />} />
                   <Route path="/super_admin/messages" element={<Messages />} />
                   <Route path="/super_admin/notifications" element={<Notifications />} />

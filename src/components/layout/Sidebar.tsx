@@ -62,7 +62,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
         { name: 'Ticket History', icon: LayoutDashboard, path: '/super_admin' },
         { name: 'User Management', icon: Users, path: '/super_admin/users' },
         { name: 'Departments', icon: Building2, path: '/super_admin/departments' },
-        { name: 'Knowledge Base', icon: BookOpen, path: '/super_admin/kb' },
         { name: 'System Settings', icon: Settings, path: '/super_admin/settings' },
         { name: 'Usage & Quotas', icon: Activity, path: '/super_admin/usage' },
         { name: 'Notifications', icon: Bell, path: '/super_admin/notifications' },
