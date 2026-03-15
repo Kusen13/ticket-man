@@ -21,6 +21,7 @@ interface TrendSolutionPanelProps {
 
 const TrendSolutionPanel: React.FC<TrendSolutionPanelProps> = ({ category, sampleTitles, sampleDescriptions, onClose }) => {
   const [solution, setSolution] = useState<string | null>(null);
+  const [videoUrl, setVideoUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { articles } = useData();
@@ -37,13 +38,14 @@ const TrendSolutionPanel: React.FC<TrendSolutionPanelProps> = ({ category, sampl
         const today = new Date().toISOString().split('T')[0];
         const { data: cachedData } = await supabase
           .from('ai_trend_solutions')
-          .select('solution')
+          .select('solution, video_url')
           .eq('category', category)
           .gte('created_at', today)
           .maybeSingle();
 
         if (cachedData) {
           setSolution(cachedData.solution);
+          setVideoUrl(cachedData.video_url);
           setLoading(false);
           return;
         }
@@ -84,6 +86,7 @@ Be specific, practical, and concise.`;
             session_id: `trend_${category}_${today}`,
             kb_articles: relevantArticles,
             trends_summary: [category, ...sampleTitles],
+            is_trend_request: true, // Specific flag for the function
           },
         });
 
@@ -109,6 +112,7 @@ Be specific, practical, and concise.`;
         await supabase.from('ai_trend_solutions').insert({
           category,
           solution: result.message,
+          video_url: result.video_url || null,
           context_summary: contextInfo,
         });
 
@@ -158,27 +162,43 @@ Be specific, practical, and concise.`;
           </div>
         )}
         {solution && (
-          <div className="text-slate-300 text-sm leading-relaxed whitespace-pre-wrap">
-            {solution.split('\n').map((line, i) => {
-              // Bold numbered steps
-              const stepMatch = line.match(/^(\d+)\.\s(.+)/);
-              if (stepMatch) return (
-                <div key={i} className="flex gap-3 mb-3">
-                  <span className="flex-shrink-0 w-6 h-6 rounded-full bg-violet-500/20 border border-violet-500/30 text-violet-300 text-[11px] font-black flex items-center justify-center">
-                    {stepMatch[1]}
-                  </span>
-                  <span className="pt-0.5">{stepMatch[2]}</span>
-                </div>
-              );
-              // Escalate note
-              if (line.toLowerCase().includes('escalate') || line.toLowerCase().includes('when to')) return (
-                <div key={i} className="mt-4 pt-4 border-t border-white/5 text-amber-400/80 text-xs font-medium">{line}</div>
-              );
-              // Empty line
-              if (!line.trim()) return <div key={i} className="h-2" />;
-              // Regular text
-              return <p key={i} className="mb-2 text-slate-400">{line}</p>;
-            })}
+          <div className="space-y-4">
+            {videoUrl && (
+              <div className="mb-5 rounded-xl overflow-hidden aspect-video bg-black/40 border border-white/5 shadow-2xl">
+                <iframe
+                  width="100%"
+                  height="100%"
+                  src={videoUrl.replace('watch?v=', 'embed/')}
+                  title="Related Tutorial"
+                  frameBorder="0"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                  allowFullScreen
+                ></iframe>
+              </div>
+            )}
+            
+            <div className="text-slate-300 text-sm leading-relaxed whitespace-pre-wrap">
+              {solution.split('\n').map((line, i) => {
+                // Bold numbered steps
+                const stepMatch = line.match(/^(\d+)\.\s(.+)/);
+                if (stepMatch) return (
+                  <div key={i} className="flex gap-3 mb-3">
+                    <span className="flex-shrink-0 w-6 h-6 rounded-full bg-violet-500/20 border border-violet-500/30 text-violet-300 text-[11px] font-black flex items-center justify-center">
+                      {stepMatch[1]}
+                    </span>
+                    <span className="pt-0.5">{stepMatch[2]}</span>
+                  </div>
+                );
+                // Escalate note
+                if (line.toLowerCase().includes('escalate') || line.toLowerCase().includes('when to')) return (
+                  <div key={i} className="mt-4 pt-4 border-t border-white/5 text-amber-400/80 text-xs font-medium">{line}</div>
+                );
+                // Empty line
+                if (!line.trim()) return <div key={i} className="h-2" />;
+                // Regular text
+                return <p key={i} className="mb-2 text-slate-400">{line}</p>;
+              })}
+            </div>
           </div>
         )}
       </div>
