@@ -1,3 +1,14 @@
+import React from 'react';
+import { useAuth } from '../../hooks/useAuth';
+import { useTickets } from '../../hooks/useTickets';
+import { TicketList } from '../../components/tickets/TicketList';
+import { PerformanceMetrics } from '../../components/admin/PerformanceMetrics';
+import { Filter, Download, Printer, Calendar } from 'lucide-react';
+import { useData } from '../../hooks/useData';
+import { useNavigate } from 'react-router-dom';
+import { ReportHeader } from '../../components/ui/ReportHeader';
+import dayjs from 'dayjs';
+import isBetween from 'dayjs/plugin/isBetween';
 import { formatTicketId } from '../../utils/ticketUtils';
 
 dayjs.extend(isBetween);
