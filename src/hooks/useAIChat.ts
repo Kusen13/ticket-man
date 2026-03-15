@@ -24,13 +24,23 @@ export const useAIChat = (sessionId?: string): UseAIChatReturn => {
   const [error, setError] = useState<string | null>(null);
   const [usage, setUsage] = useState<AIUsage | null>(null);
   const [limit, setLimit] = useState(AI_CONFIG.DEFAULT_EMPLOYEE_LIMIT);
-  const currentSessionRef = useRef<string>(sessionId || `session_${Date.now()}`);
+  
+  // Stabilize session ID: persist for the current day for this user
+  const getDailySessionId = useCallback(() => {
+    if (!user) return `anon_${Date.now()}`;
+    const today = new Date().toISOString().split('T')[0];
+    return `daily_${user.id}_${today}`;
+  }, [user]);
+
+  const currentSessionRef = useRef<string>(sessionId || getDailySessionId());
 
   useEffect(() => {
     if (sessionId) {
       currentSessionRef.current = sessionId;
+    } else {
+      currentSessionRef.current = getDailySessionId();
     }
-  }, [sessionId]);
+  }, [sessionId, getDailySessionId]);
 
   const fetchUsage = useCallback(async () => {
     if (!user) return;

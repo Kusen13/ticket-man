@@ -13,10 +13,12 @@ import { supabase } from '../../supabaseClient';
 ───────────────────────────────────────────────────────────── */
 interface TrendSolutionPanelProps {
   category: string;
+  sampleTitles: string[];
+  sampleDescriptions: string;
   onClose: () => void;
 }
 
-const TrendSolutionPanel: React.FC<TrendSolutionPanelProps> = ({ category, onClose }) => {
+const TrendSolutionPanel: React.FC<TrendSolutionPanelProps> = ({ category, sampleTitles, sampleDescriptions, onClose }) => {
   const [solution, setSolution] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -30,6 +32,21 @@ const TrendSolutionPanel: React.FC<TrendSolutionPanelProps> = ({ category, onClo
 
     const fetchSolution = async () => {
       try {
+        // 1. Check if we have a cached solution for today
+        const today = new Date().toISOString().split('T')[0];
+        const { data: cachedData } = await supabase
+          .from('ai_trend_solutions')
+          .select('solution')
+          .eq('category', category)
+          .gte('created_at', today)
+          .maybeSingle();
+
+        if (cachedData) {
+          setSolution(cachedData.solution);
+          setLoading(false);
+          return;
+        }
+
         const { data: { session } } = await supabase.auth.getSession();
         if (!session?.access_token) {
           setError('Authentication error. Please log in again.');
@@ -48,8 +65,14 @@ const TrendSolutionPanel: React.FC<TrendSolutionPanelProps> = ({ category, onClo
           .slice(0, 5)
           .map(a => ({ id: a.id, title: a.title, content: a.content.substring(0, 1500), category: a.category }));
 
-        const prompt = `The trending issue in our ticketing system is: "${category}". 
-Based on common IT/HR/Payroll/Facilities issues, provide a clear step-by-step guide employees can follow to resolve or handle this issue themselves.
+        const contextInfo = `Category: ${category}
+Recent Ticket Subjects: ${sampleTitles.join(', ')}
+Issue Context: ${sampleDescriptions}`;
+
+        const prompt = `The trending issue in our ticketing system is summarized as follows:
+${contextInfo}
+
+Based on this specific context and common IT/HR/Payroll/Facilities issues, provide a clear step-by-step guide employees can follow to resolve or handle this issue themselves.
 Format your response as:
 1. A one-sentence summary of the issue
 2. Numbered steps (at least 4 steps)
@@ -66,9 +89,9 @@ Be specific, practical, and concise.`;
           },
           body: JSON.stringify({
             message: prompt,
-            session_id: `trend_${category}_${Date.now()}`,
+            session_id: `trend_${category}_${today}`,
             kb_articles: relevantArticles,
-            trends_summary: [category],
+            trends_summary: [category, ...sampleTitles],
           }),
         });
 
@@ -84,6 +107,14 @@ Be specific, practical, and concise.`;
         }
 
         setSolution(data.message);
+
+        // 2. Cache the result for today
+        await supabase.from('ai_trend_solutions').insert({
+          category,
+          solution: data.message,
+          context_summary: sampleTitles.join(' | ')
+        });
+
       } catch (err) {
         setError('Failed to connect to AI. Please check your connection.');
       } finally {
@@ -163,11 +194,15 @@ Be specific, practical, and concise.`;
 ───────────────────────────────────────────────────────────── */
 const TrendsColumn: React.FC = () => {
   const { trends } = useTicketTrends(30);
-  const [selectedTrend, setSelectedTrend] = useState<string | null>(null);
+  const [selectedTrend, setSelectedTrend] = useState<{ category: string; titles: string[]; descriptions: string } | null>(null);
 
-  const handleTrendClick = (category: string) => {
+  const handleTrendClick = (trend: any) => {
     // If same trend clicked again, close it
-    setSelectedTrend(prev => prev === category ? null : category);
+    setSelectedTrend(prev => prev?.category === trend.category ? null : {
+      category: trend.category,
+      titles: trend.sampleTitles,
+      descriptions: trend.sampleDescriptions
+    });
   };
 
   return (
@@ -189,15 +224,14 @@ const TrendsColumn: React.FC = () => {
         ) : (
           <div className="space-y-3">
             {trends.map((trend, index) => {
-              const isActive = selectedTrend === trend.category;
               const isTop = index === 0;
               return (
                 <button
                   key={trend.category}
-                  onClick={() => handleTrendClick(trend.category)}
+                  onClick={() => handleTrendClick(trend)}
                   className={clsx(
                     'w-full text-left rounded-xl p-3 transition-all group border',
-                    isActive
+                    selectedTrend?.category === trend.category
                       ? 'bg-violet-500/15 border-violet-500/40'
                       : 'hover:bg-white/5 border-transparent hover:border-white/10'
                   )}
@@ -212,7 +246,7 @@ const TrendsColumn: React.FC = () => {
                       )} />
                       <span className={clsx(
                         'text-sm font-semibold transition-colors',
-                        isActive ? 'text-violet-300' : 'text-slate-300 group-hover:text-violet-400'
+                        selectedTrend?.category === trend.category ? 'text-violet-300' : 'text-slate-300 group-hover:text-violet-400'
                       )}>
                         {trend.category}
                       </span>
@@ -228,7 +262,7 @@ const TrendsColumn: React.FC = () => {
                         size={14}
                         className={clsx(
                           'text-slate-600 transition-all',
-                          isActive ? 'text-violet-400 rotate-90' : 'group-hover:text-violet-400 group-hover:translate-x-0.5'
+                          selectedTrend?.category === trend.category ? 'text-violet-400 rotate-90' : 'group-hover:text-violet-400 group-hover:translate-x-0.5'
                         )}
                       />
                     </div>
@@ -253,8 +287,10 @@ const TrendsColumn: React.FC = () => {
       {/* AI Solution Card — appears below when a trend is selected */}
       {selectedTrend && (
         <TrendSolutionPanel
-          key={selectedTrend}
-          category={selectedTrend}
+          key={selectedTrend.category}
+          category={selectedTrend.category}
+          sampleTitles={selectedTrend.titles}
+          sampleDescriptions={selectedTrend.descriptions}
           onClose={() => setSelectedTrend(null)}
         />
       )}
