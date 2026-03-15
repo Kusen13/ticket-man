@@ -2,7 +2,7 @@ import { useState, useCallback, useRef, useEffect } from 'react';
 import { supabase } from '../supabaseClient';
 import { useAuth } from '../hooks/useAuth';
 import { useData } from '../hooks/useData';
-import { AIChatMessage, AIUsage, AIChatResponse } from '../types';
+import { AIChatMessage, AIUsage } from '../types';
 import { AI_CONFIG } from '../lib/aiConfig';
 
 interface UseAIChatReturn {
@@ -129,43 +129,42 @@ export const useAIChat = (sessionId?: string): UseAIChatReturn => {
         category: a.category,
       }));
 
-      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      const { data: { session } } = await supabase.auth.getSession();
       
-      if (sessionError || !session?.access_token) {
+      if (!session?.access_token) {
         setError('Authentication error. Please log in again.');
         setIsLoading(false);
         return;
       }
 
-      const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || "https://lgvxipvgtquqqcmyzjug.supabase.co";
-      const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxndnhpcHZndHF1cXFjbXl6anVnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMwMjUwMDMsImV4cCI6MjA4ODYwMTAwM30.c3_1MrF6-_7R5JE4PMzauI-IU6FGv19W3druYYCBDGk";
-      
-      const response = await fetch(`${SUPABASE_URL}/functions/v1/ai-chat`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${session?.access_token}`,
-          'apikey': SUPABASE_ANON_KEY,
-        },
-        body: JSON.stringify({
+      const { data: result, error: invokeError } = await supabase.functions.invoke('ai-chat', {
+        body: {
           message: content,
           session_id: currentSessionRef.current,
           kb_articles: kbArticles,
           trends_summary: [],
-        }),
+        },
       });
 
-      const result: AIChatResponse & { error?: string } = await response.json();
+      console.log("AI Response:", result, invokeError);
 
-      console.log("AI Response:", response.status, result);
-
-      if (!response.ok) {
-        console.error("AI Error:", result.error);
-        if (result.error === 'Daily limit reached') {
-          setError(`Daily limit reached (${result.usage?.limit}/${result.usage?.limit}). Resets at midnight.`);
+      if (invokeError) {
+        console.error("AI Error:", invokeError);
+        // Supabase functions.invoke returns error as an object
+        const errorMsg = invokeError.message || invokeError.toString();
+        if (errorMsg.includes('429') || errorMsg.includes('limit')) {
+          setError('You have reached your daily AI limit. Try again tomorrow.');
+        } else if (errorMsg.includes('401')) {
+          setError('Authentication error. Please refresh the page and log in again.');
         } else {
-          setError(result.error || `Failed to get AI response (${response.status})`);
+          setError(errorMsg || 'Failed to get AI response');
         }
+        setMessages(prev => prev.filter(m => m.id !== tempUserMessage.id));
+        return;
+      }
+
+      if (!result || result.error) {
+        setError(result?.error || 'No message returned from AI');
         setMessages(prev => prev.filter(m => m.id !== tempUserMessage.id));
         return;
       }

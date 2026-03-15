@@ -53,9 +53,6 @@ const TrendSolutionPanel: React.FC<TrendSolutionPanelProps> = ({ category, sampl
           return;
         }
 
-        const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || 'https://lgvxipvgtquqqcmyzjug.supabase.co';
-        const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxndnhpcHZndHF1cXFjbXl6anVnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMwMjUwMDMsImV4cCI6MjA4ODYwMTAwM30.c3_1MrF6-_7R5JE4PMzauI-IU6FGv19W3druYYCBDGk';
-
         // Pull relevant KB articles for this category
         const relevantArticles = articles
           .filter(a =>
@@ -80,39 +77,38 @@ Format your response as:
 
 Be specific, practical, and concise.`;
 
-        const response = await fetch(`${SUPABASE_URL}/functions/v1/ai-chat`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${session.access_token}`,
-            'apikey': SUPABASE_ANON_KEY,
-          },
-          body: JSON.stringify({
+        const { data: result, error: invokeError } = await supabase.functions.invoke('ai-chat', {
+          body: {
             message: prompt,
             session_id: `trend_${category}_${today}`,
             kb_articles: relevantArticles,
             trends_summary: [category, ...sampleTitles],
-          }),
+          },
         });
 
-        const data = await response.json();
-
-        if (!response.ok) {
-          if (response.status === 429) {
+        if (invokeError) {
+          console.error("Trend AI Error:", invokeError);
+          const errorMsg = invokeError.message || invokeError.toString();
+          if (errorMsg.includes('429')) {
             setError('You have reached your daily AI limit. Try again tomorrow.');
           } else {
-            setError(data.error || 'Could not generate guide. Please try again.');
+            setError(errorMsg || 'Could not generate guide. Please try again.');
           }
           return;
         }
 
-        setSolution(data.message);
+        if (!result || result.error) {
+          setError(result?.error || 'Could not generate guide. Please try again.');
+          return;
+        }
+
+        setSolution(result.message);
 
         // 2. Cache the result for today
         await supabase.from('ai_trend_solutions').insert({
           category,
-          solution: data.message,
-          context_summary: sampleTitles.join(' | ')
+          solution: result.message,
+          context_summary: contextInfo,
         });
 
       } catch (err) {
