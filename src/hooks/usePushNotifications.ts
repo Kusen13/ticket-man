@@ -60,7 +60,6 @@ export const usePushNotifications = () => {
       if (!vapidPublicKey) {
         throw new Error('VAPID Public Key is missing from environment variables');
       }
-
       const convertedVapidKey = urlBase64ToUint8Array(vapidPublicKey);
 
       const subscription = await registration.pushManager.subscribe({

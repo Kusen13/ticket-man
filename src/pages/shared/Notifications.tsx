@@ -122,6 +122,14 @@ export const Notifications: React.FC = () => {
         </div>
       )}
 
+      {/* Diagnostic Info (Small & Subtle) */}
+      <div className="flex justify-end px-2">
+        <p className="text-[9px] text-slate-700 font-mono">
+          Env Check: {import.meta.env.VITE_VAPID_PUBLIC_KEY ? `Detected (${import.meta.env.VITE_VAPID_PUBLIC_KEY.substring(0, 5)}...)` : 'KEY_MISSING'} | 
+          v{new Date().getTime().toString().slice(-4)}
+        </p>
+      </div>
+
       <div className="glass-card overflow-hidden border-white/5">
         {userNotifications.length === 0 ? (
           <div className="text-center py-20 px-8">
