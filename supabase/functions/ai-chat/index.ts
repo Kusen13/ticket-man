@@ -144,8 +144,11 @@ serve(async (req) => {
         model: MODEL_ID,
         messages,
         temperature: 0.7,
-        max_tokens: 1024,
+        max_tokens: 512,
       }),
+    }).catch((err) => {
+      console.error("Groq fetch error:", err);
+      throw new Error("Failed to connect to AI service");
     });
 
     if (!groqResponse.ok) {
