@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Navigate, useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { supabase } from '../supabaseClient';
-import { Ticket, Mail, Lock, ArrowRight, Loader2, User as UserIcon, Sun, Moon } from 'lucide-react';
+import { Ticket, Mail, Lock, ArrowRight, Loader2, User as UserIcon, Sun, Moon, ChevronLeft } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
 
 export const LoginPage: React.FC = () => {
@@ -110,6 +110,17 @@ export const LoginPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-[var(--bg-base)] flex flex-col items-center justify-center p-4 relative overflow-hidden">
+      {/* Return to Landing Page */}
+      <div className="absolute top-6 left-6 z-50">
+        <button
+          onClick={() => navigate('/')}
+          className="flex items-center gap-2 px-4 py-2.5 bg-[var(--bg-surface)] border border-white/10 rounded-xl text-slate-400 hover:text-white hover:border-violet-500/30 transition-all shadow-xl backdrop-blur-md text-xs font-bold uppercase tracking-widest active:scale-95"
+        >
+          <ChevronLeft size={16} className="text-violet-400" />
+          Back to Home
+        </button>
+      </div>
+
       {/* Theme Toggle for Login Page */}
       <div className="absolute top-6 right-6 z-50">
         <button
