@@ -3,7 +3,7 @@ import { supabase } from '../../supabaseClient';
 import { useAuth } from '../../hooks/useAuth';
 import { useData } from '../../hooks/useData';
 import dayjs from 'dayjs';
-import { MessageSquare, Ticket, FileArchive } from 'lucide-react';
+import { MessageSquare, Ticket, FileArchive, Activity } from 'lucide-react';
 
 interface UsageData {
   tickets: number;
@@ -12,129 +12,103 @@ interface UsageData {
   storage_bytes: number;
 }
 
+const EMPTY: UsageData = { tickets: 0, comments: 0, messages: 0, storage_bytes: 0 };
+
 export const UsagePanel: React.FC = () => {
   const { user } = useAuth();
   const { config } = useData();
-  const [usage, setUsage] = useState<UsageData | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [usage, setUsage] = useState<UsageData>(EMPTY);
 
   useEffect(() => {
-    const fetchUsage = async () => {
-      if (!user) return;
-      const period = dayjs().startOf('month').format('YYYY-MM-DD');
-      const { data, error } = await supabase
-        .from('usage_quotas')
-        .select('*')
-        .eq('user_id', user.id)
-        .eq('period', period)
-        .single();
-        
-      if (!error && data) {
-        setUsage(data as UsageData);
-      } else {
-        setUsage({ tickets: 0, comments: 0, messages: 0, storage_bytes: 0 });
-      }
-      setLoading(false);
-    };
-    fetchUsage();
+    if (!user) return;
+    const period = dayjs().startOf('month').format('YYYY-MM-DD');
+    supabase
+      .from('usage_quotas')
+      .select('tickets, comments, messages, storage_bytes')
+      .eq('user_id', user.id)
+      .eq('period', period)
+      .maybeSingle()
+      .then(({ data }) => {
+        if (data) setUsage(data as UsageData);
+      });
   }, [user]);
 
-  if (!user || loading || !usage) return null;
+  if (!user) return null;
 
-  const getLimits = () => {
-    if (user.role === 'SUPER_ADMIN') {
-      return { tickets: Infinity, comments: Infinity, messages: Infinity, storageMB: config.quotaStorageSuperMb };
-    }
-    if (user.role === 'ADMIN') {
-      return { tickets: config.quotaTicketsAdmin, comments: config.quotaCommentsAdmin, messages: config.quotaMessagesAdmin, storageMB: config.quotaStorageAdminMb };
-    }
-    return { tickets: config.quotaTicketsEmployee, comments: config.quotaCommentsEmployee, messages: config.quotaMessagesEmployee, storageMB: config.quotaStorageEmployeeMb };
-  };
+  // Safe defaults in case config hasn't loaded from server yet
+  const ticketLimit   = user.role === 'SUPER_ADMIN' ? Infinity : user.role === 'ADMIN' ? (config.quotaTicketsAdmin   || 50)  : (config.quotaTicketsEmployee   || 20);
+  const commentLimit  = user.role === 'SUPER_ADMIN' ? Infinity : user.role === 'ADMIN' ? (config.quotaCommentsAdmin  || 150) : (config.quotaCommentsEmployee  || 60);
+  const messageLimit  = user.role === 'SUPER_ADMIN' ? Infinity : user.role === 'ADMIN' ? (config.quotaMessagesAdmin  || 500) : (config.quotaMessagesEmployee  || 200);
+  const storageMBLimit = user.role === 'SUPER_ADMIN' ? (config.quotaStorageSuperMb || 20) : user.role === 'ADMIN' ? (config.quotaStorageAdminMb || 10) : (config.quotaStorageEmployeeMb || 5);
 
-  const limits = getLimits();
-  const storageMBUsed = (usage.storage_bytes / (1024 * 1024)).toFixed(2);
-  const storagePct = Math.min((parseFloat(storageMBUsed) / limits.storageMB) * 100, 100);
-  
-  const ticketPct = limits.tickets === Infinity ? 0 : Math.min((usage.tickets / limits.tickets) * 100, 100);
-  const commentPct = limits.comments === Infinity ? 0 : Math.min((usage.comments / limits.comments) * 100, 100);
-  const messagePct = limits.messages === Infinity ? 0 : Math.min((usage.messages / limits.messages) * 100, 100);
+  const pct = (used: number, max: number) =>
+    max === Infinity ? 0 : Math.min(Math.round((used / max) * 100), 100);
+
+  const storageMBUsed = (usage.storage_bytes / (1024 * 1024));
+  const storagePct = pct(storageMBUsed, storageMBLimit);
+  const ticketPct  = pct(usage.tickets,  ticketLimit);
+  const commentPct = pct(usage.comments, commentLimit);
+  const messagePct = pct(usage.messages, messageLimit);
+
+  const barColor = (p: number) => p >= 90 ? 'bg-rose-500' : p >= 70 ? 'bg-amber-500' : 'bg-violet-500';
+
+  const StatBar = ({ label, icon, used, limit, percent, color }: { label: string; icon: React.ReactNode; used: number | string; limit: number | string; percent: number; color: string }) => (
+    <div>
+      <div className="flex items-center justify-between mb-2">
+        <span className="text-sm font-medium text-slate-300 flex items-center gap-2">{icon} {label}</span>
+        <span className="text-xs font-bold text-slate-400">{used} / {limit}</span>
+      </div>
+      <div className="h-2 bg-slate-800 rounded-full overflow-hidden">
+        <div className={`h-full rounded-full transition-all duration-500 ${color}`} style={{ width: `${percent}%` }} />
+      </div>
+    </div>
+  );
 
   return (
     <div className="glass-card p-6">
-      <h3 className="text-lg font-bold text-white mb-4">My Monthly Usage</h3>
-      
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        {/* Tickets */}
-        <div>
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-sm font-medium text-slate-300 flex items-center gap-2">
-              <Ticket size={16} className="text-violet-400" /> Tickets
-            </span>
-            <span className="text-xs font-bold text-slate-400">
-              {usage.tickets} / {limits.tickets === Infinity ? '∞' : limits.tickets}
-            </span>
-          </div>
-          <div className="h-2 bg-slate-800 rounded-full overflow-hidden">
-            <div 
-              className={`h-full rounded-full transition-all duration-500 ${ticketPct > 90 ? 'bg-rose-500' : 'bg-violet-500'}`}
-              style={{ width: `${ticketPct}%` }}
-            />
-          </div>
+      <div className="flex items-center gap-3 mb-5">
+        <div className="w-9 h-9 rounded-xl bg-violet-500/10 flex items-center justify-center text-violet-400">
+          <Activity size={18} />
         </div>
+        <div>
+          <h3 className="text-base font-bold text-white">My Monthly Usage</h3>
+          <p className="text-xs text-slate-500">{dayjs().format('MMMM YYYY')}</p>
+        </div>
+      </div>
 
-        {/* Comments */}
-        <div>
-          <div className="flex items-center justify-between mb-2">
-             <span className="text-sm font-medium text-slate-300 flex items-center gap-2">
-               <MessageSquare size={16} className="text-violet-400" /> Comments
-             </span>
-             <span className="text-xs font-bold text-slate-400">
-               {usage.comments} / {limits.comments === Infinity ? '∞' : limits.comments}
-             </span>
-          </div>
-          <div className="h-2 bg-slate-800 rounded-full overflow-hidden">
-             <div 
-               className={`h-full rounded-full transition-all duration-500 ${commentPct > 90 ? 'bg-rose-500' : 'bg-emerald-500'}`}
-               style={{ width: `${commentPct}%` }}
-             />
-          </div>
-        </div>
-
-        {/* Messages */}
-        <div>
-          <div className="flex items-center justify-between mb-2">
-             <span className="text-sm font-medium text-slate-300 flex items-center gap-2">
-               <MessageSquare size={16} className="text-violet-400" /> Messages
-             </span>
-             <span className="text-xs font-bold text-slate-400">
-               {usage.messages} / {limits.messages === Infinity ? '∞' : limits.messages}
-             </span>
-          </div>
-          <div className="h-2 bg-slate-800 rounded-full overflow-hidden">
-             <div 
-               className={`h-full rounded-full transition-all duration-500 ${messagePct > 90 ? 'bg-rose-500' : 'bg-blue-500'}`}
-               style={{ width: `${messagePct}%` }}
-             />
-          </div>
-        </div>
-
-        {/* Storage */}
-        <div>
-          <div className="flex items-center justify-between mb-2">
-             <span className="text-sm font-medium text-slate-300 flex items-center gap-2">
-               <FileArchive size={16} className="text-violet-400" /> Storage
-             </span>
-             <span className="text-xs font-bold text-slate-400">
-               {storageMBUsed} MB / {limits.storageMB} MB
-             </span>
-          </div>
-          <div className="h-2 bg-slate-800 rounded-full overflow-hidden">
-             <div 
-               className={`h-full rounded-full transition-all duration-500 ${storagePct > 90 ? 'bg-rose-500' : 'bg-orange-500'}`}
-               style={{ width: `${storagePct}%` }}
-             />
-          </div>
-        </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-8 gap-y-5">
+        <StatBar
+          label="Tickets"
+          icon={<Ticket size={15} className="text-violet-400" />}
+          used={usage.tickets}
+          limit={ticketLimit === Infinity ? '∞' : ticketLimit}
+          percent={ticketPct}
+          color={barColor(ticketPct)}
+        />
+        <StatBar
+          label="Comments"
+          icon={<MessageSquare size={15} className="text-emerald-400" />}
+          used={usage.comments}
+          limit={commentLimit === Infinity ? '∞' : commentLimit}
+          percent={commentPct}
+          color={commentPct >= 90 ? 'bg-rose-500' : commentPct >= 70 ? 'bg-amber-500' : 'bg-emerald-500'}
+        />
+        <StatBar
+          label="Messages"
+          icon={<MessageSquare size={15} className="text-blue-400" />}
+          used={usage.messages}
+          limit={messageLimit === Infinity ? '∞' : messageLimit}
+          percent={messagePct}
+          color={messagePct >= 90 ? 'bg-rose-500' : messagePct >= 70 ? 'bg-amber-500' : 'bg-blue-500'}
+        />
+        <StatBar
+          label="Storage"
+          icon={<FileArchive size={15} className="text-orange-400" />}
+          used={`${storageMBUsed.toFixed(2)} MB`}
+          limit={`${storageMBLimit} MB`}
+          percent={storagePct}
+          color={storagePct >= 90 ? 'bg-rose-500' : storagePct >= 70 ? 'bg-amber-500' : 'bg-orange-500'}
+        />
       </div>
     </div>
   );
