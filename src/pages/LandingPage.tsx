@@ -103,6 +103,7 @@ const ACCENT: Record<string, string> = {
 // Component
 // ─────────────────────────────────────────────
 export const LandingPage: React.FC = () => {
+  console.log('LandingPage Rendering...');
   const { theme, toggleTheme } = useTheme();
   const [scrolled, setScrolled] = useState(false);
   const [visible, setVisible] = useState(false);

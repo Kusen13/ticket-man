@@ -53,6 +53,7 @@ const RootRedirect = () => {
 };
 
 const HomeRoot = () => {
+  console.log('HomeRoot Logic Running - Routing to Landing');
   const { user, isLoading } = useAuth();
   if (isLoading) return (
     <div className="min-h-screen bg-[var(--bg-base)] flex items-center justify-center">
