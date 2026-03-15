@@ -25,7 +25,7 @@ const GROQ_API_KEY = Deno.env.get("GROQ_API_KEY") ?? "";
 const GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions";
 const MODEL_ID = "llama-3.3-70b-versatile";
 
-const MAX_MESSAGE_LENGTH = 400;
+const MAX_MESSAGE_LENGTH = 4000;
 const MAX_CONVERSATION_TURNS = 10;
 
 const SYSTEM_PROMPT = `You are "TicketBot" for Fast Services Corporation's help desk.
