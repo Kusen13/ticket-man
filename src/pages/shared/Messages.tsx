@@ -9,6 +9,7 @@ import {
 } from 'lucide-react';
 import dayjs from 'dayjs';
 import clsx from 'clsx';
+import { compressImage } from '../../utils/imageCompression';
 
 interface AttachmentPreview {
   file: File;
@@ -108,8 +109,12 @@ export const Messages: React.FC = () => {
   };
 
   // Attachments Helpers
-  const addFiles = useCallback((files: File[]) => {
-    const newPreviews: AttachmentPreview[] = files.map(file => ({
+  const addFiles = useCallback(async (files: File[]) => {
+    const compressedFiles = await Promise.all(
+      files.map(f => compressImage(f))
+    );
+
+    const newPreviews: AttachmentPreview[] = compressedFiles.map(file => ({
       file,
       preview: file.type.startsWith('image/') ? URL.createObjectURL(file) : undefined
     }));

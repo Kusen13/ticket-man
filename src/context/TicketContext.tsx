@@ -4,6 +4,7 @@ import { Ticket, TicketStatus, Comment, User } from '../types';
 import { calculateDeadline } from '../lib/sla';
 import { useAuth } from '../hooks/useAuth';
 import { useData } from '../hooks/useData';
+import dayjs from 'dayjs';
 
 export interface TicketContextType {
   tickets: Ticket[];
@@ -170,6 +171,29 @@ export const TicketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
   const addTicket = async (ticket: Omit<Ticket, 'id' | 'createdAt' | 'updatedAt' | 'reopenCount'>, files?: File[]) => {
     if (!user) return;
+    
+    // Check Quota
+    const period = dayjs().startOf('month').format('YYYY-MM-DD');
+    const { data: usageData } = await supabase.from('usage_quotas').select('tickets, storage_bytes').eq('user_id', user.id).eq('period', period).single();
+    
+    const maxTickets = user.role === 'ADMIN' ? config.quotaTicketsAdmin : 
+                       user.role === 'SUPER_ADMIN' ? Infinity : config.quotaTicketsEmployee;
+    
+    const maxStorageMb = user.role === 'SUPER_ADMIN' ? config.quotaStorageSuperMb :
+                         user.role === 'ADMIN' ? config.quotaStorageAdminMb : config.quotaStorageEmployeeMb;
+    const maxStorageBytes = maxStorageMb * 1024 * 1024;
+    
+    if ((usageData?.tickets || 0) >= maxTickets) {
+      alert(`Monthly Limit Reached: You have used all ${maxTickets} ticket submissions for this month.`);
+      throw new Error('Quota exceeded');
+    }
+    
+    const totalFilesSize = files?.reduce((acc, f) => acc + f.size, 0) || 0;
+    if ((usageData?.storage_bytes || 0) + totalFilesSize > maxStorageBytes) {
+      alert(`Storage Limit Reached: Uploading these files would exceed your ${maxStorageMb}MB monthly limit.`);
+      throw new Error('Storage quota exceeded');
+    }
+
     const createdAt = new Date().toISOString();
     const deadline = calculateDeadline(ticket.priority, createdAt, config.slaRules);
     try {
@@ -182,17 +206,21 @@ export const TicketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
             const { data: uploadData } = await supabase.storage.from('ticket-attachments').upload(fileName, file);
             if (uploadData) {
               const { data: { publicUrl } } = supabase.storage.from('ticket-attachments').getPublicUrl(uploadData.path);
-              const { data: dbAtt } = await supabase.from('ticket_attachments').insert({ ticket_id: newDbTicket.id, name: file.name, type: file.type, size: file.size, url: publicUrl }).select().single();
-              if (dbAtt) uploadedAttachments.push({ id: dbAtt.id, name: dbAtt.name, type: dbAtt.type, size: dbAtt.size, url: dbAtt.url, createdAt: dbAtt.created_at });
+                const { data: dbAtt } = await supabase.from('ticket_attachments').insert({ ticket_id: newDbTicket.id, name: file.name, type: file.type, size: file.size, url: publicUrl }).select().single();
+                if (dbAtt) uploadedAttachments.push({ id: dbAtt.id, name: dbAtt.name, type: dbAtt.type, size: dbAtt.size, url: dbAtt.url, createdAt: dbAtt.created_at });
+              }
+            }
+            if (totalFilesSize > 0) {
+               await supabase.rpc('increment_storage_usage', { p_user_id: user.id, p_period: period, p_bytes: totalFilesSize });
             }
           }
+          const finalTicket: Ticket = { id: newDbTicket.id, ticketNumber: newDbTicket.ticket_number, title: newDbTicket.title, description: newDbTicket.description, priority: newDbTicket.priority, status: newDbTicket.status, departmentId: newDbTicket.department_id, categoryId: newDbTicket.category_id, customCategory: newDbTicket.custom_category, createdBy: newDbTicket.created_by, assignedTo: newDbTicket.assigned_to, deadline: newDbTicket.deadline, reopenCount: newDbTicket.reopen_count, createdAt: newDbTicket.created_at, updatedAt: newDbTicket.updated_at, attachments: uploadedAttachments };
+          setTickets(prev => [finalTicket, ...prev]);
+          await supabase.rpc('increment_ticket_usage', { p_user_id: user.id, p_period: period });
+          await notifyInvolved(finalTicket, 'New Ticket Created', `Ticket TKT-${String(finalTicket.ticketNumber).padStart(5, '0')} has been submitted.`, 'NEW_TICKET');
         }
-        const finalTicket: Ticket = { id: newDbTicket.id, ticketNumber: newDbTicket.ticket_number, title: newDbTicket.title, description: newDbTicket.description, priority: newDbTicket.priority, status: newDbTicket.status, departmentId: newDbTicket.department_id, categoryId: newDbTicket.category_id, customCategory: newDbTicket.custom_category, createdBy: newDbTicket.created_by, assignedTo: newDbTicket.assigned_to, deadline: newDbTicket.deadline, reopenCount: newDbTicket.reopen_count, createdAt: newDbTicket.created_at, updatedAt: newDbTicket.updated_at, attachments: uploadedAttachments };
-        setTickets(prev => [finalTicket, ...prev]);
-        await notifyInvolved(finalTicket, 'New Ticket Created', `Ticket TKT-${String(finalTicket.ticketNumber).padStart(5, '0')} has been submitted.`, 'NEW_TICKET');
-      }
-    } catch (err) { console.error(err); }
-  };
+      } catch (err) { console.error(err); throw err; }
+    };
 
   const deleteTicket = async (ticketId: string) => {
     try {
@@ -258,15 +286,29 @@ export const TicketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   }, [tickets, notifyInvolved]);
 
   const addComment = useCallback(async (ticketId: string, userId: string, message: string, mentions?: string[]) => {
+    if (!user) return;
     try {
+      // Check Quota
+      const period = dayjs().startOf('month').format('YYYY-MM-DD');
+      const { data: usageData } = await supabase.from('usage_quotas').select('comments').eq('user_id', userId).eq('period', period).single();
+      
+      const maxComments = user.role === 'ADMIN' ? config.quotaCommentsAdmin : 
+                          user.role === 'SUPER_ADMIN' ? Infinity : config.quotaCommentsEmployee;
+      
+      if ((usageData?.comments || 0) >= maxComments) {
+        alert(`Monthly Limit Reached: You have used all ${maxComments} comments for this month.`);
+        throw new Error('Quota exceeded');
+      }
+
       const { data: dbComment } = await supabase.from('ticket_comments').insert({ ticket_id: ticketId, user_id: userId, message, mentions: mentions || [], read_by: [userId] }).select().single();
       if (dbComment) {
         setComments(prev => [...prev, { id: dbComment.id, ticketId: dbComment.ticket_id, userId: dbComment.user_id, message: dbComment.message, mentions: dbComment.mentions, readBy: dbComment.read_by, createdAt: dbComment.created_at }]);
+        await supabase.rpc('increment_comment_usage', { p_user_id: userId, p_period: period });
         const ticket = tickets.find(t => t.id === ticketId);
         if (ticket) await notifyInvolved(ticket, 'New Comment', `New comment on ${ticket.title}`, 'UPDATE');
       }
-    } catch (err) { console.error(err); }
-  }, [tickets, notifyInvolved]);
+    } catch (err) { console.error(err); throw err; }
+  }, [tickets, notifyInvolved, user, config.quotaCommentsAdmin, config.quotaCommentsEmployee]);
 
   const markCommentsSeen = useCallback(async (ticketId: string, userId: string) => {
     const unseen = comments.filter(c => c.ticketId === ticketId && (!c.readBy || !c.readBy.includes(userId)));

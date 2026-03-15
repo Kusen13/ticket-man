@@ -2,6 +2,7 @@ import React, { createContext, useState, useEffect, useCallback, useRef } from '
 import { User, Department, Category, SystemConfig, KBArticle, Notification, Message, AccessRequest } from '../types';
 import { supabase } from '../supabaseClient';
 import { useAuth } from '../hooks/useAuth';
+import dayjs from 'dayjs';
 
 const DEFAULT_CONFIG: SystemConfig = {
   companyName: 'Fast Services Corporation',
@@ -32,6 +33,15 @@ const DEFAULT_CONFIG: SystemConfig = {
     'email', 'outlook', 'vpn', 'license', 'software', 'update', 'reboot', 'restart', 'noisy', 'broken chair',
     'light bulb', 'not cooling', 'leaking faucet'
   ],
+  quotaTicketsEmployee: 20,
+  quotaTicketsAdmin: 50,
+  quotaCommentsEmployee: 60,
+  quotaCommentsAdmin: 150,
+  quotaMessagesEmployee: 200,
+  quotaMessagesAdmin: 500,
+  quotaStorageEmployeeMb: 5,
+  quotaStorageAdminMb: 10,
+  quotaStorageSuperMb: 20,
 };
 
 export interface DataContextType {
@@ -165,7 +175,12 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setConfig({
           companyName: dbConfig.company_name, systemEmail: dbConfig.system_email, maxReopenCount: dbConfig.max_reopen_count, autoCloseAfterDays: dbConfig.auto_close_after_days,
           notifyOnNewTicket: dbConfig.notify_on_new_ticket, notifyOnEscalation: dbConfig.notify_on_escalation, notifyOnReopen: dbConfig.notify_on_reopen,
-          slaRules: dbConfig.sla_rules, urgentKeywords: dbConfig.urgent_keywords, highKeywords: dbConfig.high_keywords, mediumKeywords: dbConfig.medium_keywords
+          slaRules: dbConfig.sla_rules, urgentKeywords: dbConfig.urgent_keywords, highKeywords: dbConfig.high_keywords, mediumKeywords: dbConfig.medium_keywords,
+          quotaTicketsEmployee: dbConfig.quota_tickets_employee, quotaTicketsAdmin: dbConfig.quota_tickets_admin,
+          quotaCommentsEmployee: dbConfig.quota_comments_employee, quotaCommentsAdmin: dbConfig.quota_comments_admin,
+          quotaMessagesEmployee: dbConfig.quota_messages_employee, quotaMessagesAdmin: dbConfig.quota_messages_admin,
+          quotaStorageEmployeeMb: parseFloat(dbConfig.quota_storage_employee_mb), quotaStorageAdminMb: parseFloat(dbConfig.quota_storage_admin_mb),
+          quotaStorageSuperMb: parseFloat(dbConfig.quota_storage_super_mb)
         });
       }
       if (dbKB) setArticles(dbKB.map((a: any) => ({ id: a.id, title: a.title, content: a.content, category: a.category, departmentId: a.department_id, createdBy: a.created_by, createdAt: a.created_at, updatedAt: a.updated_at, videoUrl: a.video_url })));
@@ -279,6 +294,31 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const getUserById = useCallback((id: string) => users.find(u => u.id === id), [users]);
 
   const sendMessage = useCallback(async (receiverId: string, content: string, senderId: string, files?: File[]) => {
+    const sender = getUserById(senderId);
+    if (!sender) return;
+
+    // Check Quota
+    const period = dayjs().startOf('month').format('YYYY-MM-DD');
+    const { data: usageData } = await supabase.from('usage_quotas').select('messages, storage_bytes').eq('user_id', senderId).eq('period', period).single();
+    
+    const maxMessages = sender.role === 'ADMIN' ? config.quotaMessagesAdmin : 
+                        sender.role === 'SUPER_ADMIN' ? Infinity : config.quotaMessagesEmployee;
+    
+    const maxStorageMb = sender.role === 'SUPER_ADMIN' ? config.quotaStorageSuperMb :
+                         sender.role === 'ADMIN' ? config.quotaStorageAdminMb : config.quotaStorageEmployeeMb;
+    const maxStorageBytes = maxStorageMb * 1024 * 1024;
+    
+    if ((usageData?.messages || 0) >= maxMessages) {
+      alert(`Monthly Limit Reached: You have used all ${maxMessages} messages for this month.`);
+      throw new Error('Quota exceeded');
+    }
+    
+    const totalFilesSize = files?.reduce((acc, f) => acc + f.size, 0) || 0;
+    if ((usageData?.storage_bytes || 0) + totalFilesSize > maxStorageBytes) {
+      alert(`Storage Limit Reached: Uploading these files would exceed your ${maxStorageMb}MB monthly limit.`);
+      throw new Error('Storage quota exceeded');
+    }
+
     const conversationId = [senderId, receiverId].sort().join('_');
     const uploadedAttachments: import('../types').Attachment[] = [];
     try {
@@ -291,10 +331,14 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
             uploadedAttachments.push({ id: Math.random().toString(36).substring(2, 11), name: file.name, type: file.type, size: file.size, url: publicUrl, createdAt: new Date().toISOString() });
           }
         }
+        if (totalFilesSize > 0) {
+          await supabase.rpc('increment_storage_usage', { p_user_id: senderId, p_period: period, p_bytes: totalFilesSize });
+        }
       }
       const { data, error: _msgError } = await supabase.from('messages').insert([{ conversation_id: conversationId, sender_id: senderId, receiver_id: receiverId, content, attachments: uploadedAttachments, is_read: false }]).select().single();
       if (data) {
         setMessages(prev => [...prev, { id: data.id, conversationId: data.conversation_id, senderId: data.sender_id, receiverId: data.receiver_id, content: data.content, attachments: data.attachments || [], isRead: data.is_read, createdAt: data.created_at }]);
+        await supabase.rpc('increment_message_usage', { p_user_id: senderId, p_period: period });
         const receiver = getUserById(receiverId);
         const sender = getUserById(senderId);
         addNotification(receiverId, 'New Message', `You received a new message from ${sender?.name || 'Someone'}`, 'MENTION', `/${receiver?.role?.toLowerCase() || 'employee'}/messages`);
@@ -501,6 +545,15 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (updates.urgentKeywords) dbUpdates.urgent_keywords = updates.urgentKeywords;
       if (updates.highKeywords) dbUpdates.high_keywords = updates.highKeywords;
       if (updates.mediumKeywords) dbUpdates.medium_keywords = updates.mediumKeywords;
+      if (updates.quotaTicketsEmployee !== undefined) dbUpdates.quota_tickets_employee = updates.quotaTicketsEmployee;
+      if (updates.quotaTicketsAdmin !== undefined) dbUpdates.quota_tickets_admin = updates.quotaTicketsAdmin;
+      if (updates.quotaCommentsEmployee !== undefined) dbUpdates.quota_comments_employee = updates.quotaCommentsEmployee;
+      if (updates.quotaCommentsAdmin !== undefined) dbUpdates.quota_comments_admin = updates.quotaCommentsAdmin;
+      if (updates.quotaMessagesEmployee !== undefined) dbUpdates.quota_messages_employee = updates.quotaMessagesEmployee;
+      if (updates.quotaMessagesAdmin !== undefined) dbUpdates.quota_messages_admin = updates.quotaMessagesAdmin;
+      if (updates.quotaStorageEmployeeMb !== undefined) dbUpdates.quota_storage_employee_mb = updates.quotaStorageEmployeeMb;
+      if (updates.quotaStorageAdminMb !== undefined) dbUpdates.quota_storage_admin_mb = updates.quotaStorageAdminMb;
+      if (updates.quotaStorageSuperMb !== undefined) dbUpdates.quota_storage_super_mb = updates.quotaStorageSuperMb;
       
       const { error } = await supabase.from('system_config').update(dbUpdates).eq('id', 1);
       if (error) {

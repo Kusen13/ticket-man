@@ -137,6 +137,15 @@ export interface SystemConfig {
   highKeywords: string[];
   mediumKeywords: string[];
   maxNotificationsHistory?: number;
+  quotaTicketsEmployee: number;
+  quotaTicketsAdmin: number;
+  quotaCommentsEmployee: number;
+  quotaCommentsAdmin: number;
+  quotaMessagesEmployee: number;
+  quotaMessagesAdmin: number;
+  quotaStorageEmployeeMb: number;
+  quotaStorageAdminMb: number;
+  quotaStorageSuperMb: number;
 }
 
 export interface AIPriorityResult {

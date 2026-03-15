@@ -321,6 +321,15 @@ CREATE TABLE IF NOT EXISTS public.system_config (
     'performance','sync','email','outlook','vpn','license','software','update',
     'reboot','restart','noisy','broken chair','light bulb','not cooling'
   ],
+  quota_tickets_employee    int NOT NULL DEFAULT 20,
+  quota_tickets_admin       int NOT NULL DEFAULT 50,
+  quota_comments_employee   int NOT NULL DEFAULT 60,
+  quota_comments_admin      int NOT NULL DEFAULT 150,
+  quota_messages_employee   int NOT NULL DEFAULT 200,
+  quota_messages_admin      int NOT NULL DEFAULT 500,
+  quota_storage_employee_mb numeric NOT NULL DEFAULT 5.0,
+  quota_storage_admin_mb    numeric NOT NULL DEFAULT 10.0,
+  quota_storage_super_mb    numeric NOT NULL DEFAULT 20.0,
   updated_at              timestamptz DEFAULT now()
 );
 
@@ -467,6 +476,100 @@ ALTER PUBLICATION supabase_realtime ADD TABLE public.tickets;
 ALTER PUBLICATION supabase_realtime ADD TABLE public.ticket_comments;
 ALTER PUBLICATION supabase_realtime ADD TABLE public.messages;
 ALTER PUBLICATION supabase_realtime ADD TABLE public.notifications;
+
+-- ============================================================
+-- 11. USAGE QUOTAS & TRACKING
+-- ============================================================
+CREATE TABLE IF NOT EXISTS public.usage_quotas (
+  id             uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id        uuid REFERENCES public.users(id) ON DELETE CASCADE NOT NULL,
+  period         date NOT NULL,
+  tickets        int NOT NULL DEFAULT 0,
+  comments       int NOT NULL DEFAULT 0,
+  messages       int NOT NULL DEFAULT 0,
+  storage_bytes  bigint NOT NULL DEFAULT 0,
+  UNIQUE (user_id, period)
+);
+
+ALTER TABLE public.usage_quotas ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Users see own usage"
+  ON public.usage_quotas FOR SELECT
+  USING (
+    auth.uid() = user_id
+    OR EXISTS (
+      SELECT 1 FROM public.users WHERE id = auth.uid() AND role IN ('ADMIN','SUPER_ADMIN')
+    )
+  );
+
+CREATE POLICY "System can upsert usage"
+  ON public.usage_quotas FOR ALL
+  USING (auth.role() = 'authenticated');
+
+-- Tracking Functions
+CREATE OR REPLACE FUNCTION public.increment_ticket_usage(p_user_id uuid, p_period date)
+RETURNS void LANGUAGE plpgsql AS $$
+BEGIN
+  INSERT INTO public.usage_quotas (user_id, period, tickets)
+    VALUES (p_user_id, p_period, 1)
+  ON CONFLICT (user_id, period)
+    DO UPDATE SET tickets = usage_quotas.tickets + 1;
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION public.increment_comment_usage(p_user_id uuid, p_period date)
+RETURNS void LANGUAGE plpgsql AS $$
+BEGIN
+  INSERT INTO public.usage_quotas (user_id, period, comments)
+    VALUES (p_user_id, p_period, 1)
+  ON CONFLICT (user_id, period)
+    DO UPDATE SET comments = usage_quotas.comments + 1;
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION public.increment_message_usage(p_user_id uuid, p_period date)
+RETURNS void LANGUAGE plpgsql AS $$
+BEGIN
+  INSERT INTO public.usage_quotas (user_id, period, messages)
+    VALUES (p_user_id, p_period, 1)
+  ON CONFLICT (user_id, period)
+    DO UPDATE SET messages = usage_quotas.messages + 1;
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION public.increment_storage_usage(p_user_id uuid, p_period date, p_bytes bigint)
+RETURNS void LANGUAGE plpgsql AS $$
+BEGIN
+  INSERT INTO public.usage_quotas (user_id, period, storage_bytes)
+    VALUES (p_user_id, p_period, p_bytes)
+  ON CONFLICT (user_id, period)
+    DO UPDATE SET storage_bytes = usage_quotas.storage_bytes + p_bytes;
+END;
+$$;
+
+-- ============================================================
+-- 12. DATA OPTIMIZATION (PG_CRON)
+-- ============================================================
+-- Enable the extension (free on Supabase)
+CREATE EXTENSION IF NOT EXISTS pg_cron;
+
+-- Delete read notifications older than 30 days (runs every day at 2 AM)
+SELECT cron.schedule(
+  'cleanup-old-notifications',
+  '0 2 * * *',
+  $$DELETE FROM public.notifications
+    WHERE is_read = true AND created_at < now() - INTERVAL '30 days'$$
+);
+
+-- Auto-close RESOLVED tickets after 7 days
+SELECT cron.schedule(
+  'auto-close-tickets',
+  '0 3 * * *',
+  $$UPDATE public.tickets
+    SET status = 'CLOSED'
+    WHERE status = 'RESOLVED'
+    AND updated_at < now() - INTERVAL '7 days'$$
+);
 
 -- ============================================================
 -- Done! All tables, policies, and seed data applied.

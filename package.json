@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.98.0",
+    "browser-image-compression": "^2.0.2",
     "clsx": "^2.1.0",
     "dayjs": "^1.11.10",
     "lucide-react": "^0.331.0",
@@ -20,6 +21,7 @@
     "tailwind-merge": "^2.2.1"
   },
   "devDependencies": {
+    "@rollup/rollup-win32-x64-msvc": "^4.59.0",
     "@types/react": "^18.2.55",
     "@types/react-dom": "^18.2.19",
     "@typescript-eslint/eslint-plugin": "^8.57.0",

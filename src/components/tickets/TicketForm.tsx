@@ -6,6 +6,7 @@ import { useData } from '../../hooks/useData';
 import { PriorityBadge } from '../ui/PriorityBadge';
 import { Bot, Loader2, Upload, X, FileText, Image as ImageIcon, File, Search, Check, ChevronDown, Maximize2, Clipboard } from 'lucide-react';
 import { Priority } from '../../types';
+import { compressImage } from '../../utils/imageCompression';
 
 interface AttachmentPreview {
   file: File;
@@ -67,8 +68,12 @@ export const TicketForm: React.FC = () => {
     }
   }, [title, description, categoryId, customCategory, categories, categorySearch]);
 
-  const addFiles = useCallback((files: File[]) => {
-    const previews: AttachmentPreview[] = files.map(f => ({ file: f }));
+  const addFiles = useCallback(async (files: File[]) => {
+    const compressedFiles = await Promise.all(
+      files.map(f => compressImage(f))
+    );
+
+    const previews: AttachmentPreview[] = compressedFiles.map(f => ({ file: f }));
     // Generate preview URLs for images
     previews.forEach((p, i) => {
       if (p.file.type.startsWith('image/')) {
