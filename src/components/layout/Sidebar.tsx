@@ -11,10 +11,9 @@ import {
   LogOut,
   Building2,
   Inbox,
-  Bell
+  Bell,
+  Activity
 } from 'lucide-react';
-import { UsagePanel } from '../dashboard/UsagePanel';
-import { SystemUsagePanel } from '../dashboard/SystemUsagePanel';
 import clsx from 'clsx';
 
 interface SidebarProps {
@@ -65,6 +64,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         { name: 'Departments', icon: Building2, path: '/super_admin/departments' },
         { name: 'Knowledge Base', icon: BookOpen, path: '/super_admin/kb' },
         { name: 'System Settings', icon: Settings, path: '/super_admin/settings' },
+        { name: 'Usage & Quotas', icon: Activity, path: '/super_admin/usage' },
         { name: 'Notifications', icon: Bell, path: '/super_admin/notifications' },
         { name: 'Messages', icon: MessageSquare, path: '/super_admin/messages' },
       );
@@ -74,6 +74,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         { name: 'Ticket History', icon: LayoutDashboard, path: '/admin' },
         { name: 'Assigned To Me', icon: Inbox, path: '/admin/assigned' },
         { name: 'Team Management', icon: Users, path: '/admin/team' },
+        { name: 'Usage & Quotas', icon: Activity, path: '/admin/usage' },
         { name: 'Notifications', icon: Bell, path: '/admin/notifications' },
         { name: 'Messages', icon: MessageSquare, path: '/admin/messages' },
       );
@@ -84,6 +85,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         { name: 'Ticket History', icon: LayoutDashboard, path: '/employee/history' },
         { name: 'Assigned To Me', icon: Inbox, path: '/employee/assigned' },
         { name: 'Knowledge Base', icon: BookOpen, path: '/employee/kb' },
+        { name: 'Usage & Quotas', icon: Activity, path: '/employee/usage' },
         { name: 'Notifications', icon: Bell, path: '/employee/notifications' },
         { name: 'Messages', icon: MessageSquare, path: '/employee/messages' },
       );
@@ -166,15 +168,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
           })}
         </div>
 
-        {/* Usage Panels */}
-        {(!isCollapsed || isMobileOpen) && (
-          <div className="mt-auto animate-fade-in divide-y divide-white/5">
-            <UsagePanel isSidebar />
-            {(user.role === 'ADMIN' || user.role === 'SUPER_ADMIN') && (
-              <SystemUsagePanel isSidebar />
-            )}
-          </div>
-        )}
       </div>
       
       {/* User Profile & Logout */}

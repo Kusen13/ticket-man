@@ -27,6 +27,7 @@ import { KnowledgeBase } from './pages/shared/KnowledgeBase';
 import { Messages } from './pages/shared/Messages';
 import { Notifications } from './pages/shared/Notifications';
 import { PendingApproval } from './pages/PendingApproval';
+import { UsageReport } from './pages/shared/UsageReport';
 
 // Quick Role Root Redirection
 const RootRedirect = () => {
@@ -73,6 +74,7 @@ function App() {
                   <Route path="/employee/kb" element={<KnowledgeBase />} />
                   <Route path="/employee/messages" element={<Messages />} />
                   <Route path="/employee/notifications" element={<Notifications />} />
+                  <Route path="/employee/usage" element={<UsageReport />} />
                   
                   {/* Admin Routes */}
                   <Route path="/admin" element={<AdminDashboard />} />
@@ -82,6 +84,7 @@ function App() {
                   <Route path="/admin/team" element={<TeamManagement />} />
                   <Route path="/admin/messages" element={<Messages />} />
                   <Route path="/admin/notifications" element={<Notifications />} />
+                  <Route path="/admin/usage" element={<UsageReport />} />
                   
                   {/* Super Admin Routes */}
                   <Route path="/super_admin" element={<SuperAdminDashboard />} />
@@ -93,6 +96,7 @@ function App() {
                   <Route path="/super_admin/settings" element={<SystemSettings />} />
                   <Route path="/super_admin/messages" element={<Messages />} />
                   <Route path="/super_admin/notifications" element={<Notifications />} />
+                  <Route path="/super_admin/usage" element={<UsageReport />} />
                 </Route>
 
                 <Route path="/" element={<RootRedirect />} />
