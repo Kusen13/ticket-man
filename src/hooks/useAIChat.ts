@@ -144,11 +144,14 @@ export const useAIChat = (sessionId?: string): UseAIChatReturn => {
 
       const result: AIChatResponse & { error?: string } = await response.json();
 
+      console.log("AI Response:", response.status, result);
+
       if (!response.ok) {
+        console.error("AI Error:", result.error);
         if (result.error === 'Daily limit reached') {
           setError(`Daily limit reached (${result.usage?.limit}/${result.usage?.limit}). Resets at midnight.`);
         } else {
-          setError(result.error || 'Failed to get AI response');
+          setError(result.error || `Failed to get AI response (${response.status})`);
         }
         setMessages(prev => prev.filter(m => m.id !== tempUserMessage.id));
         return;
