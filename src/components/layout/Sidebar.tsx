@@ -124,57 +124,59 @@ export const Sidebar: React.FC<SidebarProps> = ({
       </div>
 
       {/* Navigation */}
-      <div className="flex-1 overflow-y-auto py-6 px-4 space-y-1 custom-scrollbar">
+      <div className="flex-1 overflow-y-auto custom-scrollbar flex flex-col">
+        <div className="py-6 px-4 space-y-1">
+          {(!isCollapsed || isMobileOpen) && (
+            <div className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em] mb-4 px-3 animate-fade-in flex items-center gap-2">
+              <span className="w-1 h-1 rounded-full bg-violet-600"></span>
+              Navigation
+            </div>
+          )}
+          
+          {getNavItems().map((item) => {
+            const Icon = item.icon;
+            return (
+              <NavLink
+                key={item.path}
+                to={item.path}
+                onClick={() => { 
+                  if (isCollapsed) onExpand();
+                  if (onMobileClose) onMobileClose();
+                }}
+                end={item.path.split('/').length <= 2}
+                className={({ isActive }) => clsx(
+                  "flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-200 group text-sm font-semibold relative mb-1",
+                  isActive 
+                    ? "bg-gradient-to-r from-violet-600/20 to-transparent text-violet-400 shadow-[inset_1px_0_0_rgba(139,92,246,0.5)]" 
+                    : "text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-white/[0.03]",
+                  (isCollapsed && !isMobileOpen) && "justify-center px-0 h-11 w-11 mx-auto"
+                )}
+                title={(isCollapsed && !isMobileOpen) ? item.name : ''}
+              >
+                <Icon size={isCollapsed && !isMobileOpen ? 20 : 18} className={clsx("transition-all group-hover:scale-110 shrink-0", 
+                  "group-hover:text-violet-400")} />
+                {(!isCollapsed || isMobileOpen) && <span className="truncate animate-fade-in">{item.name}</span>}
+                
+                {/* Active Indicator Dot (Collapsed) */}
+                {(isCollapsed && !isMobileOpen) && (
+                  <div className="absolute -right-1 top-2 bottom-2 w-[2px] bg-violet-500 rounded-full opacity-0 group-[.active]:opacity-100 transition-opacity" />
+                )}
+              </NavLink>
+            );
+          })}
+        </div>
+
+        {/* Usage Panels */}
         {(!isCollapsed || isMobileOpen) && (
-          <div className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em] mb-4 px-3 animate-fade-in flex items-center gap-2">
-            <span className="w-1 h-1 rounded-full bg-violet-600"></span>
-            Navigation
+          <div className="mt-auto animate-fade-in divide-y divide-white/5">
+            <UsagePanel isSidebar />
+            {(user.role === 'ADMIN' || user.role === 'SUPER_ADMIN') && (
+              <SystemUsagePanel isSidebar />
+            )}
           </div>
         )}
-        
-        {getNavItems().map((item) => {
-          const Icon = item.icon;
-          return (
-            <NavLink
-              key={item.path}
-              to={item.path}
-              onClick={() => { 
-                if (isCollapsed) onExpand();
-                if (onMobileClose) onMobileClose();
-              }}
-              end={item.path.split('/').length <= 2}
-              className={({ isActive }) => clsx(
-                "flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-200 group text-sm font-semibold relative mb-1",
-                isActive 
-                  ? "bg-gradient-to-r from-violet-600/20 to-transparent text-violet-400 shadow-[inset_1px_0_0_rgba(139,92,246,0.5)]" 
-                  : "text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-white/[0.03]",
-                (isCollapsed && !isMobileOpen) && "justify-center px-0 h-11 w-11 mx-auto"
-              )}
-              title={(isCollapsed && !isMobileOpen) ? item.name : ''}
-            >
-              <Icon size={isCollapsed && !isMobileOpen ? 20 : 18} className={clsx("transition-all group-hover:scale-110 shrink-0", 
-                "group-hover:text-violet-400")} />
-              {(!isCollapsed || isMobileOpen) && <span className="truncate animate-fade-in">{item.name}</span>}
-              
-              {/* Active Indicator Dot (Collapsed) */}
-              {(isCollapsed && !isMobileOpen) && (
-                <div className="absolute -right-1 top-2 bottom-2 w-[2px] bg-violet-500 rounded-full opacity-0 group-[.active]:opacity-100 transition-opacity" />
-              )}
-            </NavLink>
-          );
-        })}
       </div>
       
-      {/* Usage Panels */}
-      {(!isCollapsed || isMobileOpen) && (
-        <div className="animate-fade-in divide-y divide-white/5">
-          <UsagePanel isSidebar />
-          {(user.role === 'ADMIN' || user.role === 'SUPER_ADMIN') && (
-            <SystemUsagePanel isSidebar />
-          )}
-        </div>
-      )}
-
       {/* User Profile & Logout */}
       <div className="p-4 bg-white/[0.01] border-t border-white/5">
         <div className={clsx(

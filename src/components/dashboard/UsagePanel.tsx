@@ -58,7 +58,7 @@ export const UsagePanel: React.FC<UsagePanelProps> = ({ isSidebar = false }) => 
   const barColor = (p: number) => p >= 90 ? 'bg-rose-500' : p >= 70 ? 'bg-amber-500' : 'bg-violet-500';
 
   const StatBar = ({ label, icon, used, limit, percent, color }: { label: string; icon: React.ReactNode; used: number | string; limit: number | string; percent: number; color: string }) => (
-    <div className="mb-4 last:mb-0">
+    <div>
       <div className="flex items-center justify-between mb-1.5">
         <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-2">
           {icon} {label}
