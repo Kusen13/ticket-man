@@ -82,9 +82,10 @@ export const usePushNotifications = () => {
 
       setIsSubscribed(true);
       return true;
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to subscribe to push notifications:', error);
-      alert('Failed to enable push notifications. Check permissions or keys.');
+      const msg = error?.message || 'Unknown error';
+      alert(`Push Error Details:\n- Message: ${msg}\n- Name: ${error?.name}\n\nCheck if VAPID keys are in Vercel/Env.`);
       return false;
     } finally {
       setIsLoading(false);
