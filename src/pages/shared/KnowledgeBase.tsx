@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useTicketTrends } from '../../hooks/useTicketTrends';
 import { useData } from '../../hooks/useData';
+
 import { AIChatPanel } from '../../components/ai/AIChatPanel';
 import {
   Bot, TrendingUp, Sparkles, ChevronRight, X, Loader2, AlertCircle,
