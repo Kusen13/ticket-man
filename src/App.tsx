@@ -5,6 +5,7 @@ import { TicketProvider } from './context/TicketContext';
 import { ThemeProvider } from './context/ThemeContext';
 import { useAuth } from './hooks/useAuth';
 import { LoginPage } from './pages/LoginPage';
+import { LandingPage } from './pages/LandingPage';
 import { DashboardLayout } from './components/layout/DashboardLayout';
 
 import { EmployeeDashboard } from './pages/employee/EmployeeDashboard';
@@ -41,7 +42,7 @@ const RootRedirect = () => {
       </div>
     </div>
   );
-  if (!user) return <Navigate to="/login" replace />;
+  if (!user) return <Navigate to="/" replace />;
   
   // Handle unapproved users
   if (user.approvalStatus !== 'APPROVED') {
@@ -49,6 +50,20 @@ const RootRedirect = () => {
   }
   
   return <Navigate to={`/${user.role.toLowerCase()}`} replace />;
+};
+
+const HomeRoot = () => {
+  const { user, isLoading } = useAuth();
+  if (isLoading) return (
+    <div className="min-h-screen bg-[var(--bg-base)] flex items-center justify-center">
+      <div className="flex flex-col items-center gap-4">
+        <div className="w-10 h-10 rounded-full border-2 border-violet-500 border-t-transparent animate-spin" />
+        <p className="text-slate-400 text-sm">Loading session...</p>
+      </div>
+    </div>
+  );
+  if (!user) return <LandingPage />;
+  return <RootRedirect />;
 };
 
 function App() {
@@ -99,7 +114,7 @@ function App() {
                   <Route path="/super_admin/usage" element={<UsageReport />} />
                 </Route>
 
-                <Route path="/" element={<RootRedirect />} />
+                <Route path="/" element={<HomeRoot />} />
                 <Route path="*" element={<Navigate to="/" replace />} />
               </Routes>
             </BrowserRouter>
