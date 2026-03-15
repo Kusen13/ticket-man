@@ -1,7 +1,5 @@
 import React, { useState } from 'react';
-import { useAuth } from '../../hooks/useAuth';
 import { useTicketTrends } from '../../hooks/useTicketTrends';
-import { useAIChat } from '../../hooks/useAIChat';
 import { useData } from '../../hooks/useData';
 import { AIChatPanel } from '../../components/ai/AIChatPanel';
 import {

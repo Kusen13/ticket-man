@@ -10,7 +10,7 @@ interface AIChatPanelProps {
   compact?: boolean;
 }
 
-export const AIChatPanel: React.FC<AIChatPanelProps> = ({ sessionId, compact = false }) => {
+export const AIChatPanel: React.FC<AIChatPanelProps> = ({ sessionId }) => {
   const [input, setInput] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { messages, isLoading, error, usage, limit, sendMessage, clearConversation, setFeedback } = useAIChat(sessionId);
