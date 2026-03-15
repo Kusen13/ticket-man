@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { supabase } from '../../supabaseClient';
 import { useAuth } from '../../hooks/useAuth';
-import dayjs from 'dayjs';
 import { Database, MessageSquare, Ticket, FileArchive, Users } from 'lucide-react';
 import clsx from 'clsx';
 
@@ -25,30 +24,11 @@ export const SystemUsagePanel: React.FC<SystemUsagePanelProps> = ({ isSidebar = 
   useEffect(() => {
     const fetchUsage = async () => {
       if (!user || user.role === 'EMPLOYEE') return;
-      const period = dayjs().startOf('month').format('YYYY-MM-DD');
       
-      const { data, error } = await supabase
-        .from('usage_quotas')
-        .select('*')
-        .eq('period', period);
-        
+      const { data, error } = await supabase.rpc('get_system_usage_live');
+         
       if (!error && data) {
-        const total = data.reduce((acc, curr) => {
-          return {
-            tickets: acc.tickets + curr.tickets,
-            comments: acc.comments + curr.comments,
-            messages: acc.messages + curr.messages,
-            storage_bytes: acc.storage_bytes + curr.storage_bytes,
-          };
-        }, { tickets: 0, comments: 0, messages: 0, storage_bytes: 0 });
-
-        setUsage({
-          totalTickets: total.tickets,
-          totalComments: total.comments,
-          totalMessages: total.messages,
-          totalStorageMB: parseFloat((total.storage_bytes / (1024 * 1024)).toFixed(2)),
-          activeUsers: data.length
-        });
+        setUsage(data as SystemUsage);
       } else {
         setUsage({ totalTickets: 0, totalComments: 0, totalMessages: 0, totalStorageMB: 0, activeUsers: 0 });
       }

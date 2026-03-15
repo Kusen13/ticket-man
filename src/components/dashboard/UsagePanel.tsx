@@ -34,28 +34,26 @@ export const UsagePanel: React.FC<UsagePanelProps> = ({ isSidebar = false }) => 
 
   useEffect(() => {
     if (!user) return;
-    const period = dayjs().startOf('month').format('YYYY-MM-DD');
+    
     supabase
-      .from('usage_quotas')
-      .select('tickets, comments, messages, storage_bytes')
-      .eq('user_id', user.id)
-      .eq('period', period)
-      .maybeSingle()
-      .then(({ data }) => {
-        if (data) setUsage(data as UsageData);
-        else setUsage(EMPTY);
-      });
-
-    const today = dayjs().format('YYYY-MM-DD');
-    supabase
-      .from('ai_usage_tracking')
-      .select('messages_sent, tokens_used')
-      .eq('user_id', user.id)
-      .eq('period', today)
-      .maybeSingle()
-      .then(({ data }) => {
-        if (data) setAiUsage(data as AIUsageData);
-        else setAiUsage(EMPTY_AI);
+      .rpc('get_user_usage_live', { p_user_id: user.id })
+      .then(({ data, error }) => {
+        if (error) {
+          console.error('Error fetching live usage:', error);
+          return;
+        }
+        if (data) {
+          setUsage({
+            tickets: data.tickets,
+            comments: data.comments,
+            messages: data.messages,
+            storage_bytes: data.storage_bytes
+          });
+          setAiUsage({
+            messages_sent: data.ai_messages_sent,
+            tokens_used: data.ai_tokens_used
+          });
+        }
       });
   }, [user]);
 
