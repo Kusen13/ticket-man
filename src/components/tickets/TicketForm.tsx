@@ -7,6 +7,8 @@ import { PriorityBadge } from '../ui/PriorityBadge';
 import { Bot, Loader2, Upload, X, FileText, Image as ImageIcon, File, Search, Check, ChevronDown, Maximize2, Clipboard } from 'lucide-react';
 import { Priority } from '../../types';
 import { compressImage } from '../../utils/imageCompression';
+import { supabase } from '../../supabaseClient';
+import dayjs from 'dayjs';
 
 interface AttachmentPreview {
   file: File;
@@ -37,6 +39,35 @@ export const TicketForm: React.FC = () => {
 
   const [aiAnalysis, setAiAnalysis] = useState<{ priority: Priority, confidence: number, reasoning: string } | null>(null);
   const [manualPriority, setManualPriority] = useState<Priority | null>(null);
+
+  // Storage and usage metrics
+  const [storageUsed, setStorageUsed] = useState(0);
+
+  useEffect(() => {
+    if (!user) return;
+    const period = dayjs().startOf('month').format('YYYY-MM-DD');
+    supabase
+      .from('usage_quotas')
+      .select('storage_bytes')
+      .eq('user_id', user.id)
+      .eq('period', period)
+      .maybeSingle()
+      .then(({ data }) => {
+        if (data) setStorageUsed(data.storage_bytes || 0);
+      });
+  }, [user]);
+
+  const storageMBLimit = user?.role === 'SUPER_ADMIN' 
+    ? (config.quotaStorageSuperMb || 20) 
+    : user?.role === 'ADMIN' 
+      ? (config.quotaStorageAdminMb || 10) 
+      : (config.quotaStorageEmployeeMb || 5);
+      
+  const bytesRemaining = Math.max(0, (storageMBLimit * 1024 * 1024) - storageUsed);
+  // Estimate ~50KB per compressed image
+  const totalImagesAllowed = Math.floor(bytesRemaining / (50 * 1024));
+  const imagesLeftNumber = totalImagesAllowed - attachments.length;
+  const remainingImagesDisplay = Math.max(0, imagesLeftNumber);
 
   useEffect(() => {
     if (categoryId) {
@@ -353,11 +384,18 @@ export const TicketForm: React.FC = () => {
 
               {/* Attachments */}
               <div className="space-y-2">
-                <div className="flex items-center justify-between">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                   <label className="text-sm font-medium text-slate-300">Attachments</label>
-                  <div className={`hidden sm:flex items-center gap-1.5 text-xs transition-all duration-300 ${pasteFeedback ? 'text-violet-400 opacity-100' : 'text-slate-500 opacity-70'}`}>
-                    <Clipboard size={12} />
-                    {pasteFeedback ? 'Image pasted!' : 'Ctrl+V to paste image'}
+                  <div className="flex items-center gap-3">
+                    <span className={`text-[11px] font-bold uppercase tracking-wider py-1 px-3 rounded-full flex items-center gap-1.5 border transition-colors ${imagesLeftNumber < 0 ? 'bg-rose-500/20 text-rose-400 border-rose-500/50' : 'bg-white/5 text-slate-500 border-white/5'}`}>
+                      <ImageIcon size={12} className={imagesLeftNumber < 0 ? 'text-rose-400' : 'text-violet-400'} />
+                      {imagesLeftNumber < 0 ? 'Limit Exceeded' : `${remainingImagesDisplay} images left`} 
+                      {imagesLeftNumber >= 0 && <span className="opacity-70 font-medium lowercase">(~50kb/ea)</span>}
+                    </span>
+                    <div className={`hidden sm:flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider transition-all duration-300 ${pasteFeedback ? 'text-violet-400 opacity-100' : 'text-slate-500 opacity-70'}`}>
+                      <Clipboard size={12} />
+                      {pasteFeedback ? 'Image pasted!' : 'Ctrl+V to paste'}
+                    </div>
                   </div>
                 </div>
                 <div 
@@ -440,7 +478,7 @@ export const TicketForm: React.FC = () => {
                 )}
                 <button
                   type="submit"
-                  disabled={isSubmitting || !title || !description || !departmentId}
+                  disabled={isSubmitting || !title || !description || !departmentId || imagesLeftNumber < 0}
                   className={`w-full sm:w-auto btn-primary px-8 py-3 transition-all duration-300 ${isConfirming ? 'bg-emerald-600 border-emerald-400' : ''}`}
                 >
                   {isSubmitting ? (
