@@ -3,7 +3,6 @@ import { useAuth } from '../../hooks/useAuth';
 import { useTickets } from '../../hooks/useTickets';
 import { TicketList } from '../../components/tickets/TicketList';
 import { TicketForm } from '../../components/tickets/TicketForm';
-import { UsagePanel } from '../../components/dashboard/UsagePanel';
 import { useNavigate } from 'react-router-dom';
 
 export const EmployeeDashboard: React.FC = () => {
@@ -29,10 +28,6 @@ export const EmployeeDashboard: React.FC = () => {
 
   return (
     <div className="space-y-8">
-      {/* Usage Panel */}
-      <div className="animate-slide-up">
-        <UsagePanel />
-      </div>
       {/* Primary Action: Ticket Submission - Now first section */}
       <div className="animate-slide-up">
         <TicketForm />

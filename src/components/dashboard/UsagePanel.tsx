@@ -4,6 +4,7 @@ import { useAuth } from '../../hooks/useAuth';
 import { useData } from '../../hooks/useData';
 import dayjs from 'dayjs';
 import { MessageSquare, Ticket, FileArchive, Activity } from 'lucide-react';
+import clsx from 'clsx';
 
 interface UsageData {
   tickets: number;
@@ -14,7 +15,11 @@ interface UsageData {
 
 const EMPTY: UsageData = { tickets: 0, comments: 0, messages: 0, storage_bytes: 0 };
 
-export const UsagePanel: React.FC = () => {
+interface UsagePanelProps {
+  isSidebar?: boolean;
+}
+
+export const UsagePanel: React.FC<UsagePanelProps> = ({ isSidebar = false }) => {
   const { user } = useAuth();
   const { config } = useData();
   const [usage, setUsage] = useState<UsageData>(EMPTY);
@@ -30,12 +35,12 @@ export const UsagePanel: React.FC = () => {
       .maybeSingle()
       .then(({ data }) => {
         if (data) setUsage(data as UsageData);
+        else setUsage(EMPTY);
       });
   }, [user]);
 
   if (!user) return null;
 
-  // Safe defaults in case config hasn't loaded from server yet
   const ticketLimit   = user.role === 'SUPER_ADMIN' ? Infinity : user.role === 'ADMIN' ? (config.quotaTicketsAdmin   || 50)  : (config.quotaTicketsEmployee   || 20);
   const commentLimit  = user.role === 'SUPER_ADMIN' ? Infinity : user.role === 'ADMIN' ? (config.quotaCommentsAdmin  || 150) : (config.quotaCommentsEmployee  || 60);
   const messageLimit  = user.role === 'SUPER_ADMIN' ? Infinity : user.role === 'ADMIN' ? (config.quotaMessagesAdmin  || 500) : (config.quotaMessagesEmployee  || 200);
@@ -53,33 +58,46 @@ export const UsagePanel: React.FC = () => {
   const barColor = (p: number) => p >= 90 ? 'bg-rose-500' : p >= 70 ? 'bg-amber-500' : 'bg-violet-500';
 
   const StatBar = ({ label, icon, used, limit, percent, color }: { label: string; icon: React.ReactNode; used: number | string; limit: number | string; percent: number; color: string }) => (
-    <div>
-      <div className="flex items-center justify-between mb-2">
-        <span className="text-sm font-medium text-slate-300 flex items-center gap-2">{icon} {label}</span>
-        <span className="text-xs font-bold text-slate-400">{used} / {limit}</span>
+    <div className="mb-4 last:mb-0">
+      <div className="flex items-center justify-between mb-1.5">
+        <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-2">
+          {icon} {label}
+        </span>
+        <span className="text-[10px] font-black text-slate-500">
+          {used} / {limit}
+        </span>
       </div>
-      <div className="h-2 bg-slate-800 rounded-full overflow-hidden">
-        <div className={`h-full rounded-full transition-all duration-500 ${color}`} style={{ width: `${percent}%` }} />
+      <div className="h-1.5 bg-white/5 rounded-full overflow-hidden">
+        <div 
+          className={clsx("h-full rounded-full transition-all duration-700 ease-out", color)} 
+          style={{ width: `${percent}%` }} 
+        />
       </div>
     </div>
   );
 
   return (
-    <div className="glass-card p-6">
+    <div className={clsx(
+      "transition-all duration-300",
+      isSidebar ? "px-4 py-6 border-t border-white/5" : "glass-card p-6"
+    )}>
       <div className="flex items-center gap-3 mb-5">
-        <div className="w-9 h-9 rounded-xl bg-violet-500/10 flex items-center justify-center text-violet-400">
-          <Activity size={18} />
+        <div className="w-8 h-8 rounded-lg bg-violet-600/10 flex items-center justify-center text-violet-400 shrink-0">
+          <Activity size={16} />
         </div>
-        <div>
-          <h3 className="text-base font-bold text-white">My Monthly Usage</h3>
-          <p className="text-xs text-slate-500">{dayjs().format('MMMM YYYY')}</p>
+        <div className="min-w-0">
+          <h3 className="text-xs font-black text-white uppercase tracking-widest truncate">My Monthly Usage</h3>
+          <p className="text-[10px] text-slate-500 font-bold uppercase tracking-tight">{dayjs().format('MMMM YYYY')}</p>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-8 gap-y-5">
+      <div className={clsx(
+        "grid gap-x-8 gap-y-4",
+        isSidebar ? "grid-cols-1" : "grid-cols-1 sm:grid-cols-2 lg:grid-cols-4"
+      )}>
         <StatBar
           label="Tickets"
-          icon={<Ticket size={15} className="text-violet-400" />}
+          icon={<Ticket size={12} className="text-violet-400" />}
           used={usage.tickets}
           limit={ticketLimit === Infinity ? '∞' : ticketLimit}
           percent={ticketPct}
@@ -87,7 +105,7 @@ export const UsagePanel: React.FC = () => {
         />
         <StatBar
           label="Comments"
-          icon={<MessageSquare size={15} className="text-emerald-400" />}
+          icon={<MessageSquare size={12} className="text-emerald-400" />}
           used={usage.comments}
           limit={commentLimit === Infinity ? '∞' : commentLimit}
           percent={commentPct}
@@ -95,7 +113,7 @@ export const UsagePanel: React.FC = () => {
         />
         <StatBar
           label="Messages"
-          icon={<MessageSquare size={15} className="text-blue-400" />}
+          icon={<MessageSquare size={12} className="text-blue-400" />}
           used={usage.messages}
           limit={messageLimit === Infinity ? '∞' : messageLimit}
           percent={messagePct}
@@ -103,9 +121,9 @@ export const UsagePanel: React.FC = () => {
         />
         <StatBar
           label="Storage"
-          icon={<FileArchive size={15} className="text-orange-400" />}
-          used={`${storageMBUsed.toFixed(2)} MB`}
-          limit={`${storageMBLimit} MB`}
+          icon={<FileArchive size={12} className="text-orange-400" />}
+          used={`${storageMBUsed.toFixed(2)}MB`}
+          limit={`${storageMBLimit}MB`}
           percent={storagePct}
           color={storagePct >= 90 ? 'bg-rose-500' : storagePct >= 70 ? 'bg-amber-500' : 'bg-orange-500'}
         />

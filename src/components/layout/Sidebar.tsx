@@ -13,6 +13,8 @@ import {
   Inbox,
   Bell
 } from 'lucide-react';
+import { UsagePanel } from '../dashboard/UsagePanel';
+import { SystemUsagePanel } from '../dashboard/SystemUsagePanel';
 import clsx from 'clsx';
 
 interface SidebarProps {
@@ -162,6 +164,16 @@ export const Sidebar: React.FC<SidebarProps> = ({
           );
         })}
       </div>
+      
+      {/* Usage Panels */}
+      {(!isCollapsed || isMobileOpen) && (
+        <div className="animate-fade-in divide-y divide-white/5">
+          <UsagePanel isSidebar />
+          {(user.role === 'ADMIN' || user.role === 'SUPER_ADMIN') && (
+            <SystemUsagePanel isSidebar />
+          )}
+        </div>
+      )}
 
       {/* User Profile & Logout */}
       <div className="p-4 bg-white/[0.01] border-t border-white/5">

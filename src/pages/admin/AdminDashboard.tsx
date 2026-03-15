@@ -1,16 +1,3 @@
-import React from 'react';
-import { useAuth } from '../../hooks/useAuth';
-import { useTickets } from '../../hooks/useTickets';
-import { TicketList } from '../../components/tickets/TicketList';
-import { PerformanceMetrics } from '../../components/admin/PerformanceMetrics';
-import { UsagePanel } from '../../components/dashboard/UsagePanel';
-import { SystemUsagePanel } from '../../components/dashboard/SystemUsagePanel';
-import { Filter, Download, Printer, Calendar } from 'lucide-react';
-import { useData } from '../../hooks/useData';
-import { useNavigate } from 'react-router-dom';
-import { ReportHeader } from '../../components/ui/ReportHeader';
-import dayjs from 'dayjs';
-import isBetween from 'dayjs/plugin/isBetween';
 import { formatTicketId } from '../../utils/ticketUtils';
 
 dayjs.extend(isBetween);
@@ -178,14 +165,6 @@ export const AdminDashboard: React.FC = () => {
           onTicketClick={handleTicketClick} 
           hideDeadline={true}
         />
-      </div>
-
-      <div className="animate-slide-up no-print" style={{ animationDelay: '150ms' }}>
-        <UsagePanel />
-      </div>
-
-      <div className="animate-slide-up no-print" style={{ animationDelay: '175ms' }}>
-        <SystemUsagePanel />
       </div>
 
       <div className="animate-slide-up no-print" style={{ animationDelay: '200ms' }}>

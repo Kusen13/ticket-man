@@ -4,7 +4,6 @@ import { useTickets } from '../../hooks/useTickets';
 import { useData } from '../../hooks/useData';
 import { TicketList } from '../../components/tickets/TicketList';
 import { PerformanceMetrics } from '../../components/admin/PerformanceMetrics';
-import { SystemUsagePanel } from '../../components/dashboard/SystemUsagePanel';
 import { Building2, Filter, Download, Printer, Calendar } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { ReportHeader } from '../../components/ui/ReportHeader';
@@ -200,10 +199,6 @@ export const SuperAdminDashboard: React.FC = () => {
           onTicketClick={handleTicketClick} 
           hideDeadline={true}
         />
-      </div>
-
-      <div className="animate-slide-up no-print" style={{ animationDelay: '150ms' }}>
-        <SystemUsagePanel />
       </div>
 
       <div className="animate-slide-up no-print" style={{ animationDelay: '200ms' }}>
