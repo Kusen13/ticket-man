@@ -3,8 +3,9 @@ import { supabase } from '../../supabaseClient';
 import { useAuth } from '../../hooks/useAuth';
 import { useData } from '../../hooks/useData';
 import dayjs from 'dayjs';
-import { MessageSquare, Ticket, FileArchive, Activity } from 'lucide-react';
+import { MessageSquare, Ticket, FileArchive, Activity, Bot } from 'lucide-react';
 import clsx from 'clsx';
+import { AI_CONFIG, getAIUsageColor } from '../../lib/aiConfig';
 
 interface UsageData {
   tickets: number;
@@ -13,7 +14,13 @@ interface UsageData {
   storage_bytes: number;
 }
 
+interface AIUsageData {
+  messages_sent: number;
+  tokens_used: number;
+}
+
 const EMPTY: UsageData = { tickets: 0, comments: 0, messages: 0, storage_bytes: 0 };
+const EMPTY_AI: AIUsageData = { messages_sent: 0, tokens_used: 0 };
 
 interface UsagePanelProps {
   isSidebar?: boolean;
@@ -23,6 +30,7 @@ export const UsagePanel: React.FC<UsagePanelProps> = ({ isSidebar = false }) => 
   const { user } = useAuth();
   const { config } = useData();
   const [usage, setUsage] = useState<UsageData>(EMPTY);
+  const [aiUsage, setAiUsage] = useState<AIUsageData>(EMPTY_AI);
 
   useEffect(() => {
     if (!user) return;
@@ -37,6 +45,18 @@ export const UsagePanel: React.FC<UsagePanelProps> = ({ isSidebar = false }) => 
         if (data) setUsage(data as UsageData);
         else setUsage(EMPTY);
       });
+
+    const today = dayjs().format('YYYY-MM-DD');
+    supabase
+      .from('ai_usage_tracking')
+      .select('messages_sent, tokens_used')
+      .eq('user_id', user.id)
+      .eq('period', today)
+      .maybeSingle()
+      .then(({ data }) => {
+        if (data) setAiUsage(data as AIUsageData);
+        else setAiUsage(EMPTY_AI);
+      });
   }, [user]);
 
   if (!user) return null;
@@ -45,6 +65,7 @@ export const UsagePanel: React.FC<UsagePanelProps> = ({ isSidebar = false }) => 
   const commentLimit  = user.role === 'SUPER_ADMIN' ? Infinity : user.role === 'ADMIN' ? (config.quotaCommentsAdmin  || 150) : (config.quotaCommentsEmployee  || 60);
   const messageLimit  = user.role === 'SUPER_ADMIN' ? Infinity : user.role === 'ADMIN' ? (config.quotaMessagesAdmin  || 500) : (config.quotaMessagesEmployee  || 200);
   const storageMBLimit = user.role === 'SUPER_ADMIN' ? (config.quotaStorageSuperMb || 20) : user.role === 'ADMIN' ? (config.quotaStorageAdminMb || 10) : (config.quotaStorageEmployeeMb || 5);
+  const aiDailyLimit = user.role === 'SUPER_ADMIN' ? Infinity : user.role === 'ADMIN' ? (config.aiMaxMsgsAdminDay || AI_CONFIG.DEFAULT_ADMIN_LIMIT) : (config.aiMaxMsgsPerDay || AI_CONFIG.DEFAULT_EMPLOYEE_LIMIT);
 
   const pct = (used: number, max: number) =>
     max === Infinity ? 0 : Math.min(Math.round((used / max) * 100), 100);
@@ -54,6 +75,7 @@ export const UsagePanel: React.FC<UsagePanelProps> = ({ isSidebar = false }) => 
   const ticketPct  = pct(usage.tickets,  ticketLimit);
   const commentPct = pct(usage.comments, commentLimit);
   const messagePct = pct(usage.messages, messageLimit);
+  const aiPct = aiDailyLimit === Infinity ? 0 : pct(aiUsage.messages_sent, aiDailyLimit);
 
   const barColor = (p: number) => p >= 90 ? 'bg-rose-500' : p >= 70 ? 'bg-amber-500' : 'bg-violet-500';
 
@@ -128,6 +150,26 @@ export const UsagePanel: React.FC<UsagePanelProps> = ({ isSidebar = false }) => 
           color={storagePct >= 90 ? 'bg-rose-500' : storagePct >= 70 ? 'bg-amber-500' : 'bg-orange-500'}
         />
       </div>
+
+      {!isSidebar && (
+        <div className="mt-6 pt-4 border-t border-white/5">
+          <div className="flex items-center justify-between mb-1.5">
+            <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-2">
+              <Bot size={12} className="text-violet-400" /> AI Chat (Today)
+            </span>
+            <span className="text-[10px] font-black text-slate-500">
+              {aiUsage.messages_sent} / {aiDailyLimit === Infinity ? '∞' : aiDailyLimit}
+            </span>
+          </div>
+          <div className="h-1.5 bg-white/5 rounded-full overflow-hidden">
+            <div 
+              className={clsx("h-full rounded-full transition-all duration-700 ease-out", getAIUsageColor(aiPct))} 
+              style={{ width: `${aiPct}%` }} 
+            />
+          </div>
+          <p className="text-[9px] text-slate-500 mt-1">Resets at midnight</p>
+        </div>
+      )}
     </div>
   );
 };

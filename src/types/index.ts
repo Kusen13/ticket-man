@@ -146,10 +146,48 @@ export interface SystemConfig {
   quotaStorageEmployeeMb: number;
   quotaStorageAdminMb: number;
   quotaStorageSuperMb: number;
+  aiEnabled?: boolean;
+  aiModel?: string;
+  aiMaxMsgsPerDay?: number;
+  aiMaxMsgsAdminDay?: number;
 }
 
 export interface AIPriorityResult {
   priority: Priority;
   confidence: number;
   reasoning: string;
+}
+
+export interface AIChatMessage {
+  id: string;
+  user_id: string;
+  session_id: string;
+  role: 'user' | 'assistant';
+  content: string;
+  tokens_used: number;
+  feedback?: 1 | -1 | null;
+  created_at: string;
+}
+
+export interface AIUsage {
+  user_id: string;
+  period: string;
+  messages_sent: number;
+  tokens_used: number;
+}
+
+export interface AIChatRequest {
+  message: string;
+  session_id: string;
+  kb_articles?: KBArticle[];
+  trends_summary?: string[];
+}
+
+export interface AIChatResponse {
+  message: string;
+  tokens_used: number;
+  usage: {
+    used: number;
+    limit: number;
+  };
 }

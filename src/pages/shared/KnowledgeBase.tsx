@@ -4,9 +4,12 @@ import { useData } from '../../hooks/useData';
 import { useTickets } from '../../hooks/useTickets';
 import { useAuth } from '../../hooks/useAuth';
 import { Ticket, KBArticle } from '../../types';
-import { Search, Book, ChevronRight, Hash, Sparkles, TrendingUp, HelpCircle, Clock, PlayCircle } from 'lucide-react';
+import { Search, Book, ChevronRight, Hash, Sparkles, TrendingUp, HelpCircle, Clock, PlayCircle, Bot } from 'lucide-react';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
+import { AIChatPanel } from '../../components/ai/AIChatPanel';
+import { TrendsDashboard } from '../../components/ai/TrendsDashboard';
+import { supabase } from '../../supabaseClient';
 
 dayjs.extend(relativeTime);
 
@@ -18,6 +21,20 @@ export const KnowledgeBase: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [readingArticleId, setReadingArticleId] = useState<string | null>(null);
+  const [showAIChat, setShowAIChat] = useState(false);
+  const [aiUsage, setAiUsage] = useState<{ messages_sent: number } | null>(null);
+
+  React.useEffect(() => {
+    if (!user) return;
+    const today = new Date().toISOString().split('T')[0];
+    supabase
+      .from('ai_usage_tracking')
+      .select('messages_sent')
+      .eq('user_id', user.id)
+      .eq('period', today)
+      .maybeSingle()
+      .then(({ data }) => setAiUsage(data));
+  }, [user]);
 
   // AI Logic: Detect "Trending" issues based on recent ticket activity
   const trendingCategories = useMemo(() => {
@@ -83,6 +100,18 @@ export const KnowledgeBase: React.FC = () => {
           </h1>
           <p className="text-slate-400">AI-Powered self-service portal. Try our automated guides before filing a ticket.</p>
         </div>
+        <button 
+          onClick={() => setShowAIChat(!showAIChat)}
+          className="flex items-center gap-2 px-4 py-2.5 bg-violet-600 hover:bg-violet-500 rounded-xl text-white font-bold text-sm transition-all shadow-lg shadow-violet-600/20"
+        >
+          <Bot size={18} />
+          Ask TicketBot
+          {aiUsage && (
+            <span className="ml-1 px-2 py-0.5 bg-white/20 rounded-full text-[10px]">
+              {20 - aiUsage.messages_sent} left today
+            </span>
+          )}
+        </button>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
@@ -121,31 +150,36 @@ export const KnowledgeBase: React.FC = () => {
             </div>
             
             <div className="mt-8 pt-6 border-t border-white/5">
-                <h3 className="text-[10px] font-bold text-amber-400/80 uppercase tracking-[0.2em] mb-4 px-2 flex items-center gap-2">
-                    <TrendingUp size={12} /> Live Trends
-                </h3>
-                <div className="space-y-3 px-2">
-                    {trendingCategories.map(cat => (
-                        <button 
-                          key={cat} 
-                          onClick={() => {
-                            setSelectedCategory(null);
-                            setSearchTerm(cat);
-                            setReadingArticleId(null);
-                          }}
-                          className="w-full text-left text-[11px] text-slate-300 flex items-center gap-2.5 font-medium hover:text-violet-400 transition-colors group"
-                        >
-                            <div className="w-1.5 h-1.5 rounded-full bg-violet-500 shadow-[0_0_8px_rgba(139,92,246,0.5)] group-hover:scale-125 transition-transform" />
-                            {cat}
-                        </button>
-                    ))}
-                </div>
+              <TrendsDashboard 
+                onCategoryClick={(cat) => {
+                  setSelectedCategory(null);
+                  setSearchTerm(cat);
+                  setReadingArticleId(null);
+                }}
+              />
             </div>
           </div>
         </div>
 
         {/* Article Reader / List */}
         <div className="lg:col-span-3 space-y-6">
+          {showAIChat && (
+            <div className="glass-card p-6 border-violet-500/20">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="font-bold text-white flex items-center gap-2">
+                  <Bot size={20} className="text-violet-400" />
+                  Chat with TicketBot
+                </h3>
+                <button 
+                  onClick={() => setShowAIChat(false)}
+                  className="text-slate-400 hover:text-white"
+                >
+                  ✕
+                </button>
+              </div>
+              <AIChatPanel compact />
+            </div>
+          )}
           {readingArticleId ? (
             <div className="glass-card animate-slide-up border-violet-500/10 mb-20">
               {(() => {

@@ -180,7 +180,9 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
           quotaCommentsEmployee: dbConfig.quota_comments_employee, quotaCommentsAdmin: dbConfig.quota_comments_admin,
           quotaMessagesEmployee: dbConfig.quota_messages_employee, quotaMessagesAdmin: dbConfig.quota_messages_admin,
           quotaStorageEmployeeMb: parseFloat(dbConfig.quota_storage_employee_mb), quotaStorageAdminMb: parseFloat(dbConfig.quota_storage_admin_mb),
-          quotaStorageSuperMb: parseFloat(dbConfig.quota_storage_super_mb)
+          quotaStorageSuperMb: parseFloat(dbConfig.quota_storage_super_mb),
+          aiEnabled: dbConfig.ai_enabled, aiModel: dbConfig.ai_model,
+          aiMaxMsgsPerDay: dbConfig.ai_max_msgs_per_day, aiMaxMsgsAdminDay: dbConfig.ai_max_msgs_admin_day
         });
       }
       if (dbKB) setArticles(dbKB.map((a: any) => ({ id: a.id, title: a.title, content: a.content, category: a.category, departmentId: a.department_id, createdBy: a.created_by, createdAt: a.created_at, updatedAt: a.updated_at, videoUrl: a.video_url })));
@@ -554,6 +556,10 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (updates.quotaStorageEmployeeMb !== undefined) dbUpdates.quota_storage_employee_mb = updates.quotaStorageEmployeeMb;
       if (updates.quotaStorageAdminMb !== undefined) dbUpdates.quota_storage_admin_mb = updates.quotaStorageAdminMb;
       if (updates.quotaStorageSuperMb !== undefined) dbUpdates.quota_storage_super_mb = updates.quotaStorageSuperMb;
+      if (updates.aiEnabled !== undefined) dbUpdates.ai_enabled = updates.aiEnabled;
+      if (updates.aiModel !== undefined) dbUpdates.ai_model = updates.aiModel;
+      if (updates.aiMaxMsgsPerDay !== undefined) dbUpdates.ai_max_msgs_per_day = updates.aiMaxMsgsPerDay;
+      if (updates.aiMaxMsgsAdminDay !== undefined) dbUpdates.ai_max_msgs_admin_day = updates.aiMaxMsgsAdminDay;
       
       const { error } = await supabase.from('system_config').update(dbUpdates).eq('id', 1);
       if (error) {
