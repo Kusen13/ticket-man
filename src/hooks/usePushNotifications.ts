@@ -56,7 +56,9 @@ export const usePushNotifications = () => {
 
       const registration = await navigator.serviceWorker.ready;
       
-      const vapidPublicKey = import.meta.env.VITE_VAPID_PUBLIC_KEY;
+      // We are using a hardcoded fallback here because Vercel environment variable injection
+      // has been persistently failing for this specific key. Public keys are safe to expose in the bundle.
+      const vapidPublicKey = import.meta.env.VITE_VAPID_PUBLIC_KEY || 'BKUvAjJ1VPGoeCBcrJbyUd9xn857ndKgKWJ9MM4y_v8vnTKoXsr_NaYC_lruwAOtyqWc2KWELv_QaZpxpAvuWU4';
       if (!vapidPublicKey) {
         throw new Error('VAPID Public Key is missing from environment variables');
       }
