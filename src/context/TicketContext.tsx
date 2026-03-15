@@ -224,9 +224,48 @@ export const TicketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
   const deleteTicket = async (ticketId: string) => {
     try {
+      // 1. Fetch all attachment records for this ticket
+      const { data: attachmentRecords } = await supabase
+        .from('ticket_attachments')
+        .select('id, url, name')
+        .eq('ticket_id', ticketId);
+
+      // 2. Delete files from Supabase Storage
+      if (attachmentRecords && attachmentRecords.length > 0) {
+        // Extract file paths from URLs (the path after the bucket name)
+        const storagePaths = attachmentRecords.map((att: any) => {
+          try {
+            // URL format: .../storage/v1/object/public/ticket-attachments/<path>
+            const url = new URL(att.url);
+            const pathParts = url.pathname.split('/ticket-attachments/');
+            return pathParts[1] || null;
+          } catch {
+            return null;
+          }
+        }).filter(Boolean) as string[];
+
+        if (storagePaths.length > 0) {
+          const { error: storageError } = await supabase.storage
+            .from('ticket-attachments')
+            .remove(storagePaths);
+          if (storageError) console.warn('Storage cleanup error:', storageError.message);
+        }
+
+        // 3. Delete attachment DB records
+        await supabase.from('ticket_attachments').delete().eq('ticket_id', ticketId);
+      }
+
+      // 4. Delete comments for the ticket
+      await supabase.from('ticket_comments').delete().eq('ticket_id', ticketId);
+
+      // 5. Delete the ticket itself (trigger will reset sequence if table becomes empty)
       await supabase.from('tickets').delete().eq('id', ticketId);
+
       setTickets(prev => prev.filter(t => t.id !== ticketId));
-    } catch (err) { console.error(err); }
+    } catch (err) {
+      console.error('deleteTicket error:', err);
+      throw err;
+    }
   };
 
   const updateTicketStatus = async (id: string, status: TicketStatus, reason?: string) => {
