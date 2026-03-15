@@ -119,8 +119,14 @@ export const useAIChat = (sessionId?: string): UseAIChatReturn => {
         category: a.category,
       }));
 
-      const { data: { session } } = await supabase.auth.getSession();
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
       
+      if (sessionError || !session?.access_token) {
+        setError('Authentication error. Please log in again.');
+        setIsLoading(false);
+        return;
+      }
+
       const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || "https://lgvxipvgtquqqcmyzjug.supabase.co";
       const response = await fetch(`${SUPABASE_URL}/functions/v1/ai-chat`, {
         method: 'POST',
