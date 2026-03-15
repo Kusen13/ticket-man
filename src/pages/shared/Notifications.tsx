@@ -90,11 +90,35 @@ export const Notifications: React.FC = () => {
             </div>
           </div>
           <button 
-            onClick={subscribe}
+            onClick={async () => {
+              const success = await subscribe();
+              if (success) {
+                alert('🎉 Push Notifications Enabled Successfully!');
+              }
+            }}
             className="btn-primary py-2.5 px-6 shrink-0 shadow-[0_0_20px_rgba(139,92,246,0.2)] whitespace-nowrap"
           >
             Enable Notifications
           </button>
+        </div>
+      )}
+
+      {isSupported && isSubscribed && !isLoading && (
+        <div className="px-4 py-2 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[10px] font-bold uppercase tracking-widest inline-flex items-center gap-2">
+          <CheckCircle2 size={12} />
+          Mobile Push Registered
+        </div>
+      )}
+
+      {!isSupported && !isLoading && (
+        <div className="glass-card border border-amber-500/20 bg-amber-500/5 p-4 rounded-2xl">
+          <p className="text-xs text-amber-400 flex items-center gap-2">
+            <AlertCircle size={14} />
+            Push Notifications not supported in this browser. 
+            {/iPhone|iPad|iPod/.test(navigator.userAgent) && (
+              <span className="font-bold ml-1">Tip: You must "Add to Home Screen" on iOS 16.4+ for this to work.</span>
+            )}
+          </p>
         </div>
       )}
 
