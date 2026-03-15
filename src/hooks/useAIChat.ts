@@ -129,6 +129,8 @@ export const useAIChat = (sessionId?: string): UseAIChatReturn => {
         category: a.category,
       }));
 
+      // Force session refresh to ensure JWT is valid
+      await supabase.auth.refreshSession();
       const { data: { session } } = await supabase.auth.getSession();
       
       if (!session?.access_token) {
