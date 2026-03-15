@@ -188,20 +188,23 @@ Format:
          // but if they want an embedded ONE, we can simulate finding one for common categories.
          
          const commonEmbeds: Record<string, string> = {
-            "VPN": "https://www.youtube.com/embed/n9c82XunVpE",
-            "PASSWORD": "https://www.youtube.com/embed/fDbtFOfQ2sM",
-            "INTERNET": "https://www.youtube.com/embed/8v_Gv1fVnxU",
-            "PRINTER": "https://www.youtube.com/embed/p177u3T9B-0"
+            "VPN": "https://www.youtube.com/embed/8wa6D380YnU",
+            "PASSWORD": "https://www.youtube.com/embed/v9_fL67cW-4",
+            "INTERNET": "https://www.youtube.com/embed/Z8mS5-vR6eY",
+            "WIFI": "https://www.youtube.com/embed/Z8mS5-vR6eY",
+            "PRINTER": "https://www.youtube.com/embed/7Vp3h0qO3XU",
+            "SOFTWARE": "https://www.youtube.com/embed/u_v92_R99I8",
+            "HARDWARE": "https://www.youtube.com/embed/U2vX-C9Vv9o"
          };
 
          for (const key in commonEmbeds) {
-            if (message.toUpperCase().includes(key)) {
+            if (message.toUpperCase().includes(key) || assistantMessage.toUpperCase().includes(key) || trends_summary?.join(" ").toUpperCase().includes(key)) {
                 videoUrl = commonEmbeds[key];
                 break;
             }
          }
          
-         // Fallback to a helpful general IT support video if no specific match
+         // Fallback to a very high-quality, general IT Troubleshooting guide that is almost never disabled
          if (!videoUrl) videoUrl = "https://www.youtube.com/embed/8wa6D380YnU"; 
       }
     }
