@@ -1,0 +1,13 @@
+{
+  "compilerOptions": {
+    "allowJs": true,
+    "lib": ["deno.window"],
+    "types": ["deno-types"]
+  },
+  "imports": {
+    "supabase": "https://esm.sh/@supabase/supabase-js@2"
+  },
+  "tasks": {
+    "dev": "deno run --watch --allow-net --allow-env supabase/functions/ai-chat/index.ts"
+  }
+}

@@ -1,3 +1,18 @@
+// @ts-nocheck - Deno Edge Function (run with Deno, not TypeScript)
+declare module "https://deno.land/std@0.168.0/http/server.ts" {
+  export function serve(handler: (req: Request) => Promise<Response> | Response): void;
+}
+
+declare module "https://esm.sh/@supabase/supabase-js@2" {
+  export function createClient(supabaseUrl: string, supabaseKey: string): any;
+}
+
+declare const Deno: {
+  env: {
+    get(key: string): string | undefined;
+  };
+};
+
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
@@ -6,7 +21,7 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-const GROQ_API_KEY = Deno.env.get("GROQ_API_KEY")!;
+const GROQ_API_KEY = Deno.env.get("GROQ_API_KEY") ?? "";
 const GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions";
 const MODEL_ID = "llama-3.3-70b-versatile";
 
@@ -25,29 +40,55 @@ RULES:
 KNOWLEDGE BASE: {kb_articles}
 RECENT TRENDS: {trends_summary}`;
 
-serve(async (req) => {
+serve(async (req: Request): Promise<Response> => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
   }
 
   try {
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-    const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-    const supabase = createClient(supabaseUrl, supabaseKey);
+    const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
+    const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 
-    const authHeader = req.headers.get("Authorization")!;
-    const token = authHeader.replace("Bearer ", "");
-    const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+    const authHeader = req.headers.get("Authorization");
 
-    if (authError || !user) {
-      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+    if (!authHeader) {
+      return new Response(JSON.stringify({ error: "Missing Authorization header" }), {
         status: 401,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    const { user_id, role } = user;
+    // Use ANON key client to verify the user's JWT — this is the correct approach
+    const supabaseAuth = createClient(supabaseUrl, supabaseAnonKey, {
+      global: { headers: { Authorization: authHeader } },
+    });
+    const { data: { user }, error: authError } = await supabaseAuth.auth.getUser();
+
+    console.log("Auth error:", authError?.message ?? "none");
+    console.log("User:", user ? user.id : "not found");
+
+    if (authError || !user) {
+      return new Response(JSON.stringify({ error: "Unauthorized", details: authError?.message }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // Use SERVICE ROLE key client for all DB reads/writes (bypasses RLS safely server-side)
+    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
+    const user_id = user.id;
     const { message, session_id, kb_articles, trends_summary } = await req.json();
+
+    // Fetch the user's role directly from the users table (reliable)
+    const { data: userData } = await supabase
+      .from("users")
+      .select("role")
+      .eq("id", user_id)
+      .single();
+    const role = userData?.role || "EMPLOYEE";
+
 
     if (!message || !session_id) {
       return new Response(JSON.stringify({ error: "Missing required fields" }), {

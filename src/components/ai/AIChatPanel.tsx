@@ -37,7 +37,7 @@ export const AIChatPanel: React.FC<AIChatPanelProps> = ({ sessionId, compact = f
   };
 
   return (
-    <div className={clsx("flex flex-col h-full", compact ? "max-h-[400px]" : "h-[600px]")}>
+    <div className="flex flex-col flex-1 h-full">
       <div className="flex items-center justify-between mb-4 pb-4 border-b border-white/5">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-xl bg-violet-500/20 flex items-center justify-center">
