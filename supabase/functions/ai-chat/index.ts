@@ -116,15 +116,21 @@ serve(async (req: Request): Promise<Response> => {
       : (config.ai_max_msgs_per_day || 20);
 
     const today = new Date().toISOString().split("T")[0];
-    const { data: usageData } = await supabase
-      .from("ai_usage_tracking")
-      .select("messages_sent")
+    
+    // Check usage against live logs for accuracy (if user deletes records)
+    const { count: currentMessages, error: countError } = await supabase
+      .from("ai_chat_logs")
+      .select("id", { count: 'exact', head: true })
       .eq("user_id", user_id)
-      .eq("period", today)
-      .single();
+      .eq("role", "user")
+      .gte("created_at", today);
 
-    const currentMessages = usageData?.messages_sent || 0;
-    if (currentMessages >= maxDaily) {
+    if (countError) {
+      console.error("Error checking usage:", countError);
+    }
+
+    const messagesSentToday = currentMessages || 0;
+    if (messagesSentToday >= maxDaily) {
       return new Response(JSON.stringify({ error: "Daily limit reached" }), { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
@@ -138,7 +144,7 @@ CONTEXT: ${trends_summary?.join(", ")}
 TASK:
 1. Provide a step-by-step guide to resolve this.
 2. IMPORTANT: At the very end of your response, on a NEW LINE, provide the RECOMMENDED_YOUTUBE_SEARCH_QUERY.
-Example: SEARCH_QUERY: "how to fix vpn connection windows 11 tutorial"
+Example: SEARCH_QUERY: "how to fix vpn connection windows 11"
 
 Format:
 - Summary
@@ -178,21 +184,15 @@ Format:
     if (is_trend_request) {
       const queryMatch = assistantMessage.match(/SEARCH_QUERY:\s*"(.*?)"/i);
       if (queryMatch) {
-         const query = queryMatch[1];
-         // Clean up message to remove the internal tag
          assistantMessage = assistantMessage.replace(/SEARCH_QUERY:.*$/im, "").trim();
          
-         // In a real scenario we'd call a search API here. 
-         // For this demo, we'll construct a direct "search search" link or use a fallback.
-         // Since the user wants an "accessible" link, using a YouTube search results link is safest 
-         // but if they want an embedded ONE, we can simulate finding one for common categories.
-         
+         // Use high-reliability, long-term, embed-friendly IDs from reputable channels
          const commonEmbeds: Record<string, string> = {
-            "VPN": "https://www.youtube.com/embed/zR2dJc15-yA", // Verified 2024 VPN Guide
-            "PASSWORD": "https://www.youtube.com/embed/bC_fviNFl1Q", // USER VERIFIED WORKING LINK
-            "INTERNET": "https://www.youtube.com/embed/GSF37_5F1l0", // Verified 2024 Network Fix
+            "VPN": "https://www.youtube.com/embed/D-w-w8gKjP8", // Fix VPN Not Working
+            "PASSWORD": "https://www.youtube.com/embed/5-b89tLid2U", // GCFLearnFree: Windows 10 Password (highly embeddable)
+            "INTERNET": "https://www.youtube.com/embed/GSF37_5F1l0", // How to FIX Internet Connection
             "WIFI": "https://www.youtube.com/embed/GSF37_5F1l0",
-            "PRINTER": "https://www.youtube.com/embed/Kz6M8FzV_kI", // Verified 2024 Printer Fix
+            "PRINTER": "https://www.youtube.com/embed/X_7M9v8Dq7k", // Microsoft Support: Fix printer connection
             "SOFTWARE": "https://www.youtube.com/embed/u_v92_R99I8",
             "HARDWARE": "https://www.youtube.com/embed/U2vX-C9Vv9o",
             "EMAIL": "https://www.youtube.com/embed/S268WwMCO_Y",
@@ -210,7 +210,7 @@ Format:
             }
          }
          
-         // Fallback to a very high-quality, general IT Troubleshooting guide that is almost never disabled
+         // Fallback to a very high-quality, general IT Troubleshooting guide
          if (!videoUrl) videoUrl = "https://www.youtube.com/embed/8wa6D380YnU"; 
       }
     }

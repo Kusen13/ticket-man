@@ -4,7 +4,7 @@ import { useData } from '../../hooks/useData';
 
 import { AIChatPanel } from '../../components/ai/AIChatPanel';
 import {
-  Bot, TrendingUp, Sparkles, ChevronRight, X, Loader2, AlertCircle,
+  Bot, TrendingUp, Sparkles, ChevronRight, X, Loader2, AlertCircle, ExternalLink,
 } from 'lucide-react';
 import clsx from 'clsx';
 import { supabase } from '../../supabaseClient';
@@ -164,16 +164,29 @@ Be specific, practical, and concise.`;
         {solution && (
           <div className="space-y-4">
             {videoUrl && (
-              <div className="mb-5 rounded-xl overflow-hidden aspect-video bg-black/40 border border-white/5 shadow-2xl">
-                <iframe
-                  width="100%"
-                  height="100%"
-                  src={videoUrl.replace('watch?v=', 'embed/')}
-                  title="Related Tutorial"
-                  frameBorder="0"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                  allowFullScreen
-                ></iframe>
+              <div className="mb-5 space-y-2">
+                <div className="rounded-xl overflow-hidden aspect-video bg-black/40 border border-white/5 shadow-2xl">
+                  <iframe
+                    width="100%"
+                    height="100%"
+                    src={videoUrl.replace('watch?v=', 'embed/')}
+                    title="Related Tutorial"
+                    frameBorder="0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                    allowFullScreen
+                  ></iframe>
+                </div>
+                <div className="flex justify-end">
+                  <a 
+                    href={videoUrl.replace('embed/', 'watch?v=')} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="text-[10px] text-violet-400 hover:text-violet-300 flex items-center gap-1 font-bold uppercase tracking-wider transition-colors"
+                  >
+                    <ExternalLink size={10} />
+                    Watch on YouTube
+                  </a>
+                </div>
               </div>
             )}
             
