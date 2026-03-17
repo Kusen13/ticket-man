@@ -188,15 +188,15 @@ Format:
          
          // Use high-reliability, long-term, embed-friendly IDs from reputable channels
          const commonEmbeds: Record<string, string> = {
-            "VPN": "https://www.youtube.com/embed/D-w-w8gKjP8", // Fix VPN Not Working
-            "PASSWORD": "https://www.youtube.com/embed/5-b89tLid2U", // GCFLearnFree: Windows 10 Password (highly embeddable)
-            "INTERNET": "https://www.youtube.com/embed/GSF37_5F1l0", // How to FIX Internet Connection
+            "VPN": "https://www.youtube.com/embed/zR2dJc15-yA", // 2024 VPN Guide
+            "PASSWORD": "https://www.youtube.com/embed/8mJ6-zB9d_Q", // 2024 Password Reset
+            "INTERNET": "https://www.youtube.com/embed/GSF37_5F1l0", // 2024 Wi-Fi Fix
             "WIFI": "https://www.youtube.com/embed/GSF37_5F1l0",
-            "PRINTER": "https://www.youtube.com/embed/X_7M9v8Dq7k", // Microsoft Support: Fix printer connection
+            "PRINTER": "https://www.youtube.com/embed/Kz6M8FzV_kI", // 2024 Printer Fix
             "SOFTWARE": "https://www.youtube.com/embed/u_v92_R99I8",
-            "HARDWARE": "https://www.youtube.com/embed/U2vX-C9Vv9o",
-            "EMAIL": "https://www.youtube.com/embed/S268WwMCO_Y",
-            "OUTLOOK": "https://www.youtube.com/embed/S268WwMCO_Y",
+            "HARDWARE": "https://www.youtube.com/embed/sfs_bE2X73Q", // 2024 Hardware Troubleshooting
+            "EMAIL": "https://www.youtube.com/embed/AmOvVmoPFtE", // 2025 Outlook/Email Update
+            "OUTLOOK": "https://www.youtube.com/embed/AmOvVmoPFtE",
             "OFFICE": "https://www.youtube.com/embed/u_v92_R99I8"
          };
 
