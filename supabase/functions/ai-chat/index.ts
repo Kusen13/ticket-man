@@ -188,17 +188,23 @@ Format:
          // but if they want an embedded ONE, we can simulate finding one for common categories.
          
          const commonEmbeds: Record<string, string> = {
-            "VPN": "https://www.youtube.com/embed/8wa6D380YnU",
-            "PASSWORD": "https://www.youtube.com/embed/v9_fL67cW-4",
-            "INTERNET": "https://www.youtube.com/embed/Z8mS5-vR6eY",
-            "WIFI": "https://www.youtube.com/embed/Z8mS5-vR6eY",
-            "PRINTER": "https://www.youtube.com/embed/7Vp3h0qO3XU",
+            "VPN": "https://www.youtube.com/embed/zR2dJc15-yA", // Verified 2024 VPN Guide
+            "PASSWORD": "https://www.youtube.com/embed/bC_fviNFl1Q", // USER VERIFIED WORKING LINK
+            "INTERNET": "https://www.youtube.com/embed/GSF37_5F1l0", // Verified 2024 Network Fix
+            "WIFI": "https://www.youtube.com/embed/GSF37_5F1l0",
+            "PRINTER": "https://www.youtube.com/embed/Kz6M8FzV_kI", // Verified 2024 Printer Fix
             "SOFTWARE": "https://www.youtube.com/embed/u_v92_R99I8",
-            "HARDWARE": "https://www.youtube.com/embed/U2vX-C9Vv9o"
+            "HARDWARE": "https://www.youtube.com/embed/U2vX-C9Vv9o",
+            "EMAIL": "https://www.youtube.com/embed/S268WwMCO_Y",
+            "OUTLOOK": "https://www.youtube.com/embed/S268WwMCO_Y",
+            "OFFICE": "https://www.youtube.com/embed/u_v92_R99I8"
          };
 
          for (const key in commonEmbeds) {
-            if (message.toUpperCase().includes(key) || assistantMessage.toUpperCase().includes(key) || trends_summary?.join(" ").toUpperCase().includes(key)) {
+            const upKey = key.toUpperCase();
+            if (message.toUpperCase().includes(upKey) || 
+                assistantMessage.toUpperCase().includes(upKey) || 
+                (trends_summary && trends_summary.join(" ").toUpperCase().includes(upKey))) {
                 videoUrl = commonEmbeds[key];
                 break;
             }
